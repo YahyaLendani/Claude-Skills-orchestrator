@@ -1,13 +1,27 @@
 # Skills Orchestrator
 
-A Claude skill that picks and combines the right skills for a task without
-being asked, splits big jobs across multiple agents (each with its own task
-and its own skills), and learns from what worked.
+[![tests](https://github.com/YahyaLendani/Skills-orchestrator/actions/workflows/tests.yml/badge.svg)](https://github.com/YahyaLendani/Skills-orchestrator/actions/workflows/tests.yml)
+[![release](https://img.shields.io/github/v/release/YahyaLendani/Skills-orchestrator?color=blue)](https://github.com/YahyaLendani/Skills-orchestrator/releases)
+[![license](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![python](https://img.shields.io/badge/python-3.11%20%7C%203.13-3776ab.svg)](#testing)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin%20%2B%20skill-d97757.svg)](#install)
 
-It works in two modes and switches between them automatically:
+**Your skills, working as a team.** Skills Orchestrator picks the skills a task
+needs, splits big jobs across agents that each get their own skills, checks the
+work with a fresh agent, and remembers what worked.
 
-- **Coding**: building apps, fixing bugs, tests, reviews.
-- **Documents & business**: reports, slides, spreadsheets, PDFs, research.
+Claude Code already loads a skill when its description matches what you asked.
+What it does not do is decide that a job needs debugging *and*
+test-driven-development *and* a report, notice that two of them disagree, hand
+each part to an agent that only sees what it needs, and keep a record of what
+worked. That is the part this covers.
+
+- **Nothing to configure.** It reads the skills you already have installed and
+  picks from them.
+- **Nothing without your yes.** It never installs a skill, saves a draft, or
+  swaps a weak one without asking.
+- **Nothing wasted.** A simple one-skill task never sees a mode line, a preview
+  or a memory write.
 
 ## What it does
 
@@ -82,8 +96,8 @@ have it.
 
 ## Install
 
-Two ways in. The plugin is easier and updates itself. Copying the folder is
-the manual option, and it gives you the skill on its own.
+Two ways in. The plugin is easier and updates itself. Copying the folder is the
+manual option, and it gives you the skill on its own.
 
 **As a plugin** (recommended):
 
@@ -93,11 +107,9 @@ the manual option, and it gives you the skill on its own.
 ```
 
 That installs the skill, the `/orchestrate` command, the `checker` agent, and a
-one-line reminder at the start of each session. Update it with `/plugin update
-skills-orchestrator`. To try a local checkout without installing anything:
-`claude --plugin-dir /path/to/Skills-orchestrator`.
-
-Both commands need access to this repository, which is private for now.
+one-line reminder at the start of each session. Update it with
+`/plugin update skills-orchestrator`. To try a local checkout without
+installing anything: `claude --plugin-dir /path/to/Skills-orchestrator`.
 
 **By copying the folder** (the skill only):
 
@@ -120,7 +132,9 @@ mkdir -p ~/.claude/skills && rm -rf ~/.claude/skills/skills-orchestrator && cp -
 mkdir -p .claude/skills && rm -rf .claude/skills/skills-orchestrator && cp -r /path/to/Skills-orchestrator/skills-orchestrator .claude/skills/skills-orchestrator
 ```
 
-The `rm -rf` removes an older copy first, so updating works the same way as installing. Start a new Claude Code session afterwards so the skill is picked up.
+The `rm -rf` removes an older copy first, so updating works the same way as
+installing. Start a new Claude Code session afterwards so the skill is picked
+up.
 
 A copied install gets the skill but not the command, the checker agent or the
 startup line. The checker then falls back to a fresh general-purpose agent
@@ -128,6 +142,18 @@ with the same instructions, which is what it always did before the plugin
 existed.
 
 Current version: 1.3.0.
+
+## Quick start
+
+| You want | Say |
+|---|---|
+| Let it decide | "Fix the login bug and write a one-page manager report about it." |
+| Force the flow on a small task | `/orchestrate refactor the invoice parser` |
+| Clear a stale track record | "reset score for pdf" |
+| Take over the mode | "use documents mode" |
+
+It starts working on the first turn. There is no setup step, no config file and
+no command to learn unless you want one.
 
 ## How it compares
 
@@ -142,6 +168,27 @@ Several existing skills cover parts of this idea. None of them cover all of it.
 | Find Skills (community) | Helps an agent search for skills to install, when asked. | Looks for a missing skill only when the task needs it, never installs without your yes, and drafts one when nothing exists. |
 | `skill-creator` / `superpowers:writing-skills` | Create and improve skills, with tests, one at a time. | Drafts a small skill during a task when one is missing, and offers to keep it if it worked. |
 | Claude's built-in skill loading | Loads an installed skill when its description matches the request. | Works across several skills: combines them, resolves conflicts, and remembers what worked. |
+
+## How it works
+
+```
+skills-orchestrator/        the skill: one Markdown file per mode and feature
+  SKILL.md                  the nine-step flow, read first
+  modes/                    coding.md, documents.md
+  features/                 memory, conflicts, new skills, preview, reliability,
+                            checker, cards, trimming, board
+commands/orchestrate.md     /orchestrate
+agents/checker.md           the checker agent
+hooks/hooks.json            the one-line reminder at session start
+.claude-plugin/             plugin manifest, marketplace entry, icon
+tests/                      188 structure checks, 40 behavior scenarios
+docs/superpowers/           the design spec and plan for each round
+```
+
+`SKILL.md` is short on purpose. Each supporting file is read only when a step
+needs it, so a job that does not touch memory never pays for the memory rules.
+The plugin is a thin layer over the same files: the skill folder is unchanged
+whether you install it as a plugin or copy it in.
 
 ## Design decisions
 
@@ -178,10 +225,6 @@ and shown in one line, so you can override it with "use documents mode".
 planned, or when a draft or suggested skill is involved. Small tasks aren't
 slowed down.
 
-**Safety.** It never installs a skill without your yes. Draft skills contain
-instructions only, with no scripts. Memory stores short summaries, never file
-contents, passwords or keys.
-
 **Scores live in their own file, `scores.md`.** It sits next to
 `memory.md`, in the same two places and with the same rules. It's separate
 because memory drops old recipes (5 per task type), but a skill's track
@@ -215,18 +258,48 @@ affects other agents (a finding, decision, blocker or question), one line at a
 time, never secrets. At the end, the 1–2 most useful lines go into the memory
 note and the job folder is deleted, so nothing piles up or gets committed.
 
+**The startup line is one sentence, not a mode.** It is there so the
+orchestrator gets considered, not so it runs. The sentence ends by saying to
+ignore it for a simple one-skill task, and the skill's own "when not to use"
+rule still applies. It costs about one line of context per session and can be
+removed from `hooks/hooks.json`.
+
+## Safety
+
+- Nothing is installed, saved or swapped without a yes. Suggestions are
+  suggestions.
+- Draft skills contain instructions only, with no scripts.
+- Memory and scores keep short summaries, dates and counts: never file
+  contents, passwords or keys.
+- The board is deleted at the end of each job and is never committed.
+- The checker sees the task, the skills and the evidence, never the full chat.
+
 ## Testing
 
-- **Structure checks:** `python3 -m pytest` checks that every file exists
-  and contains the agreed rules (paths, reply options, rule order, and so on).
-  Install the test tools once with `pip install -r requirements-dev.txt`
-  (`pytest` and `pyyaml`). The same checks run on every push and pull request
-  in CI, on Linux and Windows.
-- **Behavior checks:** `tests/scenarios.md` lists 40 scenarios (11–16 cover the safety rules, 17–24 the reliability score and checker, 25–32 cards, trimming and the board, 33–40 the plugin, the startup line, `/orchestrate` and the checker agent). Scenarios 1–32 have recorded before and after runs (`tests/results/baseline.md`,
-  `tests/results/round-a-baseline.md`, `tests/results/round-b-baseline.md`,
-  `tests/results/with-skill.md`) showing that the skill changes behavior. The
-  runs for 33–40 are still to be recorded.
+- **Structure checks:** `python3 -m pytest` runs 188 checks that every file
+  exists and contains the agreed rules (paths, reply options, rule order,
+  manifest fields, and so on). Install the test tools once with
+  `pip install -r requirements-dev.txt` (`pytest` and `pyyaml`). The same
+  checks run on every push and pull request in CI, on Linux and Windows,
+  Python 3.11 and 3.13.
+- **Behavior checks:** `tests/scenarios.md` lists 40 scenarios (11–16 cover the
+  safety rules, 17–24 the reliability score and checker, 25–32 cards, trimming
+  and the board, 33–40 the plugin, the startup line, `/orchestrate` and the
+  checker agent). Scenarios 1–32 have recorded before and after runs
+  (`tests/results/baseline.md`, `tests/results/round-a-baseline.md`,
+  `tests/results/round-b-baseline.md`, `tests/results/with-skill.md`) showing
+  that the skill changes behavior. The runs for 33–40 are still to be recorded.
+- **Plugin packaging:** `claude plugin validate . --strict` passes, and the
+  manifest's own shape is covered by the pytest suite.
+
+Pull requests are welcome. Run `python -m pytest` first; it is the same check
+CI runs.
 
 ## Coming later
 
-- **Submitting to the plugin directory:** once the repository is public.
+- **A plugin directory listing:** the plugin validates cleanly and is packaged
+  for one; submitting it to Anthropic's plugin directory is the next step.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
