@@ -178,7 +178,9 @@ note and the job folder is deleted, so nothing piles up or gets committed.
 
 - **Structure checks:** `python3 -m pytest` checks that every file exists
   and contains the agreed rules (paths, reply options, rule order, and so on).
-  Needs `pytest` and `pyyaml`.
+  Install the test tools once with `pip install -r requirements-dev.txt`
+  (`pytest` and `pyyaml`). The same checks run on every push and pull request
+  in CI, on Linux and Windows.
 - **Behavior checks:** `tests/scenarios.md` lists 32 scenarios (11–16 cover the safety rules, 17–24 the reliability score and checker, 25–32 cards, trimming and the board). Each one is
   run on a fresh agent without the feature (`tests/results/baseline.md`,
   `tests/results/round-a-baseline.md`, `tests/results/round-b-baseline.md`) and with it (`tests/results/with-skill.md`) to show that the skill changes
