@@ -77,6 +77,7 @@ goes under the current working folder:
 
 - **Memory file missing:** continue without memory. Create the file when saving the first entry.
 - **First time the project file is created:** tell the user in one line: "I'm saving what worked to `.claude/skills-orchestrator/memory.md`. It will be committed with the project; add it to `.gitignore` if you'd rather git-ignore it."
+  If there is no git repository, say instead: "I'm saving what worked to `.claude/skills-orchestrator/memory.md` in this folder."
 - **Memory file unreadable** (broken format, hand-edited): never overwrite it. Rename it to `memory.bak.md` in the same folder, start a new `memory.md`, and tell the user in one line that the old file was kept as `memory.bak.md`.
 - **Same entry in both files:** when merging, entries with the same task and date count once.
 - **Secrets in the request:** if the user's message contains a password, token or API key, leave out the secret when writing `task` and `note`. Describe it in general words ("used the user's API key"), never the value.

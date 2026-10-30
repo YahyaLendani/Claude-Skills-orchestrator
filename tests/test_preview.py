@@ -40,3 +40,10 @@ def test_cancel_deletes_draft():
     t = text()
     for s in ["cancel", "delete", "draft", "nothing is saved to memory"]:
         assert s in t, s
+
+
+def test_size_words_do_not_overlap():
+    t = text()
+    assert "`small` — 2 agents with short tasks" in t
+    assert "`medium` — 3 agents, or 2 agents with longer tasks" in t
+    assert "`large` — 4 or more agents" in t

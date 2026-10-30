@@ -40,4 +40,8 @@ Example:
 
 `⚖️ Conflict: brainstorming says "design first", quick-fix says "just patch" → using brainstorming (coding mode prefers the safer option).`
 
+When a skill disagrees with the user's own request (rule 1), name the request instead of a second skill:
+
+`⚖️ Conflict: test-driven-development says "write the test first", your request says "quick throwaway prototype" → using your request (your instructions win).`
+
 If there are no conflicts, the preview shows `⚖️ Conflicts: none`.

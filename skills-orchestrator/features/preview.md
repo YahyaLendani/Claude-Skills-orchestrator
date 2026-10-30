@@ -40,7 +40,7 @@ Reply: yes / edit / cancel
 - **⚖️ Conflicts:** one line per conflict (format in `features/conflicts.md`), or `none`.
 - **Rough size:** the agent count plus one word:
   - `small` — 2 agents with short tasks;
-  - `medium` — 2–3 agents, or longer tasks;
+  - `medium` — 3 agents, or 2 agents with longer tasks;
   - `large` — 4 or more agents, or long tasks.
   Never give an exact cost: it cannot be known in advance.
 

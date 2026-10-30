@@ -58,3 +58,15 @@ def test_only_markdown_files():
     for p in SKILL_DIR.rglob("*"):
         if p.is_file():
             assert p.suffix == ".md", f"non-markdown file in skill: {p}"
+
+
+def test_part_needing_no_skill():
+    assert "skills: none" in section(text(), "## Flow")
+
+
+def test_when_to_split():
+    assert "one after another" in section(text(), "## Flow")
+
+
+def test_unclear_task_asks_one_question():
+    assert "one focused question" in section(text(), "## Flow")

@@ -66,3 +66,8 @@ def test_first_project_memory_notice():
 
 def test_skippable_question():
     assert "Did that work well? (yes / partly / no)" in text()
+
+
+def test_no_git_notice_has_own_wording():
+    # With no git repo the file is not committed, so the notice must not say so.
+    assert "If there is no git repository, say instead:" in text()

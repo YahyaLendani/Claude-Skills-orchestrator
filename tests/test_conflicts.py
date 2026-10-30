@@ -40,3 +40,7 @@ def test_different_agents():
 def test_conflict_line_format():
     assert "⚖️ Conflict:" in text()
     assert "→ using" in text()
+
+
+def test_conflict_with_user_request_format():
+    assert 'your request says' in text()
