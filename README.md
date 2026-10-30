@@ -22,7 +22,10 @@ split across agents:
 3. **Picks the skills** for each part of the task from what you have installed.
    A skill that keeps failing is flagged with a suggested replacement. If
    nothing fits a part, it suggests an existing skill or **drafts a new
-   one** for that task.
+   one** for that task. Each skill gets an automatic **card** (what it needs,
+   what it produces, its sections and key rules), used to check that chained
+   skills fit: `🧩 Fit: Agent 2 needs test results, Agent 1's skills don't
+   produce them. Add that to Agent 1's task? (yes / no)`.
 4. **Settles conflicts** when two skills disagree, using clear priority rules,
    and shows you the decision.
 5. **Shows a preview** of the plan for big jobs and waits for your
@@ -46,7 +49,12 @@ split across agents:
    Reply: yes / edit / cancel
    ```
 
-6. **Runs the agents**, then on big jobs a fresh **checker** agent reviews
+6. **Runs the agents.** Big skills (over 150 lines) are given as a
+   **trimmed** copy with only the sections each agent needs, plus the skill's
+   key rules. Agents working at the same time share a short **board**, so a
+   finding reaches the others right away:
+   `[Agent 1] finding: sessions now expire after 30 minutes, not 24 hours`.
+   Then, on big jobs, a fresh **checker** agent reviews
    each agent's work (task done, skill rules followed, claims backed by
    evidence) and offers one fix round if it finds problems:
 
@@ -147,19 +155,35 @@ fresh agent that did none of the work. When it finds problems it reports them
 and offers one fix round; nothing is redone without your yes. A weak skill is
 flagged, never swapped silently.
 
+**Skill cards are made automatically and kept as a cache.** Most skills are
+written by other people, so asking you to write cards would mean most skills
+never get one. The orchestrator reads a skill the first time it's used, writes
+a short card next to where the skill is installed, and rebuilds it when the
+skill changes (it keeps a fingerprint of the skill file). Your skills are never
+modified, and a lost card is simply made again.
+
+**Big skills are cut down with temporary copies, and the key rules always stay
+in.** A trimmed copy holds only the sections an agent's task needs, so it can't
+wander off into the rest. The skill's key rules are always included, so cutting
+never drops something the skill insists on, and the copy names the full
+skill's path in case something is missing. Small skills (150 lines or fewer)
+are given whole.
+
+**The board is short and deleted after each job.** Agents post only what
+affects other agents (a finding, decision, blocker or question), one line at a
+time, never secrets. At the end, the 1–2 most useful lines go into the memory
+note and the job folder is deleted, so nothing piles up or gets committed.
+
 ## Testing
 
 - **Structure checks:** `python3 -m pytest` checks that every file exists
   and contains the agreed rules (paths, reply options, rule order, and so on).
   Needs `pytest` and `pyyaml`.
-- **Behavior checks:** `tests/scenarios.md` lists 24 scenarios (11–16 cover the safety rules, 17–24 the reliability score and checker). Each one is
+- **Behavior checks:** `tests/scenarios.md` lists 32 scenarios (11–16 cover the safety rules, 17–24 the reliability score and checker, 25–32 cards, trimming and the board). Each one is
   run on a fresh agent without the feature (`tests/results/baseline.md`,
-  `tests/results/round-a-baseline.md`) and with it (`tests/results/with-skill.md`) to show that the skill changes
+  `tests/results/round-a-baseline.md`, `tests/results/round-b-baseline.md`) and with it (`tests/results/with-skill.md`) to show that the skill changes
   behavior.
 
 ## Coming later
 
-- **Cutting big skills down** to only the part each agent needs.
-- **Skill cards:** each skill declares what it needs and what it produces, so skills can be chained safely.
-- **Shared board:** agents post findings while working, so others can react right away.
 - **Startup hook and `/orchestrate` command:** turning the skill into a full plugin, so it's active in every session.

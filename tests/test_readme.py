@@ -34,9 +34,8 @@ def test_memory_decision_explained():
 
 def test_coming_later():
     later = section(text(), "## Coming later").lower()
-    for s in ["skill cards", "shared board", "startup hook"]:
-        assert s in later, s
-    for s in ["reliability score", "checker agent"]:
+    assert "startup hook" in later
+    for s in ["reliability score", "checker agent", "skill cards", "shared board", "cutting big skills"]:
         assert s not in later, s
 
 
@@ -60,3 +59,15 @@ def test_cloud_memory_needs_commit():
 
 def test_readme_mentions_reset():  # Final I8
     assert "reset score for" in text()
+
+
+def test_readme_round_b():
+    what = section(text(), "## What it does")
+    for s in ["card", "trimmed", "board"]:
+        assert s in what, s
+
+
+def test_round_b_decisions():
+    d = section(text(), "## Design decisions")
+    for s in ["cards", "cache", "key rules", "deleted"]:
+        assert s in d, s
