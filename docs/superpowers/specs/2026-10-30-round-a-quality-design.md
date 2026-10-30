@@ -215,3 +215,30 @@ The job's memory entry gets one overall result: `worked` only if every agent
 ## 8. README
 
 Update the README: Round A features in "What it does", the `scores.md` decision (why a separate file: memory drops old recipes, scores must not), and move the reliability score and checker agent from "Coming later" to done.
+
+## 9. Changes made during the build
+
+These replace the matching rules above (found by the behavior tests and the
+final review):
+
+- **Counting is once per job, not per agent** (replaces "each time an agent
+  uses a skill, +1"). When several agents used a skill, count the result most
+  of them had; on a tie, the worse one. Per-agent counting let one parallel
+  job push a skill past the 3-use threshold.
+- **Each score file keeps its own line.** A job's result is added to each
+  file's own line; lines are never copied between files (the user file and the
+  project file cover different histories, and a `last_problem` note from one
+  project must not land in another project's committed file).
+- **Resets carry `reset_on: <date>`.** A reset line wins over the other file's
+  line when its `reset_on` is later than that line's `last_used`, and the reset
+  is carried over to the other file on the next write.
+- **The checker blames only the skill whose rule broke.** Task-only or
+  missing-evidence problems mark no skill down.
+- **Agents hand back evidence for each skill's key rules** (e.g. the test
+  failing before the fix), so the checker doesn't flag good work for missing
+  proof.
+- **Weak skills on small jobs:** without a preview, the weak-skill line is
+  shown on its own before starting.
+- **Replacement** is another installed skill for the same kind of work.
+- **"reset score for <skill>"** is part of the skill's trigger and is mentioned
+  in the README.

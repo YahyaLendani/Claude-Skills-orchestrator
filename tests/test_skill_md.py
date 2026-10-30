@@ -94,3 +94,16 @@ def test_scores_read_and_saved():
 def test_evidence_handed_back():
     flow = section(text(), "## Flow")
     assert "evidence" in flow and "test output" in flow
+
+
+def test_step_9_no_per_agent_counting():  # Final I1
+    assert "that agent's result" not in section(text(), "## Flow")
+    assert "once per job" in section(text(), "## Flow")
+
+
+def test_evidence_for_skill_rules():  # Final I4
+    assert "each of its skills' key rules" in section(text(), "## Flow")
+
+
+def test_reset_reachable():  # Final I8
+    assert "reset score for" in frontmatter("SKILL.md")["description"]

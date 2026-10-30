@@ -56,3 +56,7 @@ def test_reinstall_replaces_old_folder():
 
 def test_cloud_memory_needs_commit():
     assert "once it's committed" in section(text(), "## Design decisions")
+
+
+def test_readme_mentions_reset():  # Final I8
+    assert "reset score for" in text()

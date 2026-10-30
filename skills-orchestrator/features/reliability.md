@@ -23,7 +23,7 @@ outside the list is fine; keep it as it is.
 
 ## Counting
 
-- Each skill used in a job gets +1 under its result: `worked`, `partly` or `failed`. Count it once per job, even when several agents used it (e.g. three parallel pdf agents); if their results differ, count the worst one (`failed` over `partly` over `worked`).
+- Each skill used in a job gets +1 under its result: `worked`, `partly` or `failed`. Count it once per job, even when several agents used it (e.g. three parallel pdf agents). If their results differ, count the result most of those agents had; on a tie, count the worse of the tied results (`failed` is worse than `partly`, `partly` worse than `worked`).
 - Update `last_used`. Set `last_problem` when the result wasn't `worked`; when it was `worked`, keep `last_problem` as it is (it records the last time something went wrong).
 - **Big jobs:** the result comes from the checker's verdict (see `features/checker.md`, "Verdict and score").
 - **Other orchestrated jobs** (mode line shown, no preview): the result comes from the signs — tests passed, the user accepted it, the user asked for fixes — the same signs as `features/memory.md` "Judging the result".
@@ -46,15 +46,26 @@ own), cloud sessions, and the home folder. See `features/memory.md`
 with more total uses (`worked + partly + failed`), and never add the two
 lines together — that would count the same jobs twice.
 
-**Writing both files:** start from the line you read (the one with more
-uses), add this job's result, and write that same line to both files. That
-way the two files agree again after each job.
+**Writing both files:** add this job's result to each file's own line. Each
+file keeps its own history (the user file covers all of the user's projects;
+the project file covers this project), and reading the larger line means no
+job is counted twice. Never copy a line, or its `last_problem` note, from one
+file into the other.
+
+**Resets:** a line that was reset carries `reset_on: <date>`. When reading,
+if one file's line has a `reset_on` later than the other file's `last_used`,
+use the reset line, even if it has fewer uses. When writing, if the line you
+read carries a `reset_on` that the other file's line doesn't have, reset that
+line too (counts to zero, same `reset_on`) before adding this job.
 
 **First-time notice:** when memory.md and scores.md are both new, mention
-both in one line, e.g. "I'm saving what worked and skill scores to
-`.claude/skills-orchestrator/` (memory.md and scores.md). They're not
-committed yet — want me to include them in the next commit?" When only
-scores.md is new, use the memory wording from `features/memory.md` with
+both in one line, using the case that fits (the same three cases as
+`features/memory.md` "Problems"):
+- Not git-ignored: "I'm saving what worked and skill scores to `.claude/skills-orchestrator/` (memory.md and scores.md). They're not committed yet — want me to include them in the next commit? (Add them to `.gitignore` if you'd rather not keep them in git.)"
+- Git-ignored: "I'm saving what worked and skill scores to `.claude/skills-orchestrator/`. They're git-ignored, so they stay on this machine only."
+- When there is no git repository: "I'm saving what worked and skill scores to `.claude/skills-orchestrator/` in this folder."
+
+When only scores.md is new, use the memory wording for that case with
 "skill scores" and `scores.md` in place of memory.
 
 ## Weak skills
@@ -68,10 +79,11 @@ When a chosen skill is weak, add this line to the preview:
 
 `⚠️ Weak skill: <name> worked <worked> of <total> times. Use <replacement> instead? (yes / no)`
 
-- **Replacement:** the next-closest installed skill from the current mode's `## Preferred skills`. Skip any weak skill: never suggest a weak skill as the replacement; try the next one.
+- **Replacement:** another installed skill for the same kind of work (the same row of the current mode's `## Preferred skills`, or the closest installed match for that work). Skip any weak skill: never suggest a weak skill as the replacement; try the next one.
 - **No replacement:** use `⚠️ Weak skill: <name> worked <worked> of <total> times. Draft a replacement? (yes / no)` and, on yes, follow `features/new-skills.md`.
 - **yes:** use the replacement for that part.
 - **no:** keep the skill, and don't ask about it again in this session.
+- **When there's no preview** (a small orchestrated job, so no preview): show the line on its own before starting, and wait for the answer.
 - Never swap a skill without the user's yes — even when it is weak.
 - Show the line even when the user's instructions named it (e.g. their CLAUDE.md asks for that skill): they may not know its record. Their answer decides; if they say no, their instruction stands.
 
@@ -83,7 +95,7 @@ than 3 uses counts as neither weak nor strong.
 
 When the user says "reset score for <name>" (e.g. after updating that
 skill), set its `worked`, `partly` and `failed` to zero and clear
-`last_problem` (`""`), in both files. Confirm in one line. This is not an
+`last_problem` (`""`), and set `reset_on` to today, in both files (when the user folder isn't writable, the project file only — the `reset_on` rule in "Where it lives" carries it over later). Confirm in one line. This is not an
 orchestrated job: no mode line, no preview.
 
 ## Problems

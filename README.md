@@ -140,6 +140,8 @@ record shouldn't shrink when old recipes are dropped. When the two
 `scores.md` files disagree, the one with more uses wins; they're never added
 together, so jobs aren't counted twice.
 
+If you update a skill, say **"reset score for <skill>"** so old failures don't count against the new version.
+
 **The checker runs only on big jobs, and fixes only with your yes.** It's a
 fresh agent that did none of the work. When it finds problems it reports them
 and offers one fix round; nothing is redone without your yes. A weak skill is

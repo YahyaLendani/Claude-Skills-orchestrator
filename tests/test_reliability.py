@@ -79,13 +79,15 @@ def test_no_secrets():
         assert s in text(), s
 
 
-def test_once_per_job_worst_result():  # Task 6 fix: parallel agents inflated counts
+def test_once_per_job_majority_result():  # Task 6 fix, amended in final review
     c = section(text(), "## Counting")
-    assert "once per job" in c and "worst" in c
+    assert "once per job" in c and "most of those agents had" in c
 
 
-def test_write_same_line_to_both():  # Task 6 fix: files drifted apart
-    assert "write that same line to both files" in section(text(), "## Where it lives")
+def test_each_file_keeps_its_own_line():  # Final I2: ruling B reverted
+    w = section(text(), "## Where it lives")
+    assert "write that same line to both files" not in w
+    assert "to each file's own line" in w
 
 
 def test_weak_flag_even_when_user_named_it():  # Task 6 fix
@@ -98,3 +100,22 @@ def test_last_problem_kept_on_worked():  # Task 6 fix
 
 def test_one_notice_for_both_files():  # Task 6 fix
     assert "memory.md and scores.md" in section(text(), "## Where it lives")
+
+
+def test_reset_survives_merge():  # Final I3
+    t = text()
+    assert "reset_on" in section(t, "## Reset")
+    assert "reset_on" in section(t, "## Where it lives")
+
+
+def test_weak_line_without_preview():  # Final I6
+    assert "no preview" in section(text(), "## Weak skills")
+
+
+def test_replacement_same_kind_of_work():  # Final I7
+    assert "same kind of work" in section(text(), "## Weak skills")
+
+
+def test_no_git_notice_for_both_files():  # Final M6, re-graded
+    w = section(text(), "## Where it lives")
+    assert "no git repository" in w and "git-ignored" in w

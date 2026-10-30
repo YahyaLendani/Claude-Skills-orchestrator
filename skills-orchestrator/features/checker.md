@@ -55,13 +55,22 @@ Send Agent 2 back to fix these once? (yes / no)
 
 ## Verdict and score
 
-The result counted for each skill an agent used (`features/reliability.md`):
+Each agent gets one outcome from this table:
 
 | Checker outcome for that agent | Result |
 |---|---|
 | ✅ pass first time | `worked` |
 | Problems, all fixed in the fix round | `partly` |
 | Problems not fixed (user said no, or the fix didn't solve them) | `partly` if the agent's main task was done, `failed` if not |
+
+**Which skills it counts against:** a problem that names a skill's rule
+(e.g. "docs skill: required sections") counts against only the skill whose rule
+broke. Problems with the task itself or with missing evidence mark no skill down
+— they still count toward the job's memory result. Skills that
+agent used with no broken rule count as `worked`.
+
+The skill results then go to `features/reliability.md` "Counting": each
+skill is counted once per job, even when several agents used it.
 
 The job's memory entry (`features/memory.md`) gets one overall result:
 `worked` only if every agent `worked`; `failed` if any agent's main task was
