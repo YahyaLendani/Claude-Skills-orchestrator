@@ -322,10 +322,11 @@ instructions, which is exactly today's behavior.
 
 ## 12. Open questions for review
 
-- **Hook on by default?** This spec says yes, with one self-limiting line.
-  The alternative is to ship it but leave it out of `plugin.json` until asked.
-- **`1.3.0` or `2.0.0`?** Nothing breaks for copy users and the skill's rules
-  don't change, so `1.3.0` fits. `2.0.0` would signal the new install path.
-- **Private much longer?** The install lines only work for people who can read
-  the repository. If it stays private, the README should say so; if it goes
-  public, submitting to the plugin directory becomes a real Round D.
+Answered 2026-10-30:
+
+- **Hook on by default?** Yes. One self-limiting line, as Section 4.
+- **`1.3.0` or `2.0.0`?** `1.3.0`. Nothing breaks for copy users and the
+  skill's rules do not change.
+- **Private much longer?** For now. The README says the install commands need
+  access to the repository, and submitting to the plugin directory stays under
+  "Coming later".
