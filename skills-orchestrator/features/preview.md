@@ -28,8 +28,9 @@ Agent 2 → write a 1-page manager report (waits for Agent 1)
   skills: docs
 🆕 Draft skill: none
 ⚖️ Conflicts: none
+🔍 Checker: on
 
-Rough size: 2 agents · medium
+Rough size: 2 agents + checker · medium
 Reply: yes / edit / cancel
 ```
 
@@ -41,8 +42,10 @@ Reply: yes / edit / cancel
   `🆕 Suggested skill: <name> (from <source>) — needs a separate yes to install`.
   A `yes` to the plan does not install it; ask the install question from
   `features/new-skills.md` next.
+- **⚠️ Weak skill:** add this line only when a chosen skill is weak (format and rule in `features/reliability.md`), e.g. `⚠️ Weak skill: old-report-skill worked 1 of 4 times. Use docs instead? (yes / no)`. Its answer can come with the plan's reply (e.g. "yes, and yes to docs"); if it doesn't, ask it after the plan's yes.
+- **🔍 Checker:** `on` for big jobs, or `off` when the user turned it off with `edit` (see `features/checker.md`).
 - **⚖️ Conflicts:** one line per conflict (format in `features/conflicts.md`), or `none`.
-- **Rough size:** the agent count plus one word:
+- **Rough size:** the agent count (plus `+ checker` when the checker is on) and one word:
   - `small` — 1–2 agents with short tasks;
   - `medium` — 3 agents, or 2 agents with longer tasks;
   - `large` — 4 or more agents, or long tasks.

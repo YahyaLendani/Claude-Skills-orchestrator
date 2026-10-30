@@ -61,3 +61,9 @@ def test_no_and_stop_mean_cancel():  # M1
 
 def test_edit_dropping_draft_deletes_it():  # M2
     assert "drops the agent that uses a draft" in section(text(), "## Replies")
+
+
+def test_preview_round_a_lines():
+    block = re.search(r"```\n(📋 Orchestration plan.*?)```", text(), re.S).group(1)
+    assert "🔍 Checker: on" in block and "+ checker" in block
+    assert "⚠️ Weak skill:" in text() and "features/reliability.md" in text()

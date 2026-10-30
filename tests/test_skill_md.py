@@ -3,7 +3,8 @@ import re
 from helpers import SKILL_DIR, body, frontmatter, read_skill_file, section
 
 SUPPORT_FILES = ["modes/coding.md", "modes/documents.md", "features/memory.md",
-                 "features/conflicts.md", "features/new-skills.md", "features/preview.md"]
+                 "features/conflicts.md", "features/new-skills.md", "features/preview.md",
+                 "features/reliability.md", "features/checker.md"]
 
 
 def text():
@@ -80,3 +81,16 @@ def test_trigger_not_too_broad():  # M10
     fm = frontmatter("SKILL.md")
     assert "several steps" not in fm["description"]
     assert "several steps" not in section(text(), "## When to use")
+
+
+def test_step_8_check_and_combine():
+    assert "**Check and combine.**" in section(text(), "## Flow")
+
+
+def test_scores_read_and_saved():
+    assert section(text(), "## Flow").count("scores.md") >= 2
+
+
+def test_evidence_handed_back():
+    flow = section(text(), "## Flow")
+    assert "evidence" in flow and "test output" in flow
