@@ -34,8 +34,20 @@ def test_memory_decision_explained():
 
 def test_coming_later():
     later = section(text(), "## Coming later").lower()
-    for s in ["reliability score", "skill cards", "shared board", "checker agent", "startup hook"]:
+    for s in ["skill cards", "shared board", "startup hook"]:
         assert s in later, s
+    for s in ["reliability score", "checker agent"]:
+        assert s not in later, s
+
+
+def test_readme_round_a():
+    what = section(text(), "## What it does")
+    assert "reliability score" in what and "checker" in what
+
+
+def test_scores_decision_explained():
+    d = section(text(), "## Design decisions")
+    assert "scores.md" in d and "drops old recipes" in d
 
 
 def test_reinstall_replaces_old_folder():
@@ -44,3 +56,7 @@ def test_reinstall_replaces_old_folder():
 
 def test_cloud_memory_needs_commit():
     assert "once it's committed" in section(text(), "## Design decisions")
+
+
+def test_readme_mentions_reset():  # Final I8
+    assert "reset score for" in text()

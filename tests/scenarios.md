@@ -138,3 +138,69 @@ Prompt: "Review our Terraform files for security problems and write a short repo
 Expected:
 - Preview shows `🆕 Suggested skill: terraform-review (from …) — needs a separate yes to install`.
 - After the plan's "yes", asks a separate question ("Install `terraform-review` from …? (yes / no)") and does not install before that answer.
+
+## 17. Weak skill
+Setup: Inside a git repo. Installed skills also include `old-report-skill`. Project `.claude/skills-orchestrator/scores.md` contains:
+```yaml
+- skill: old-report-skill
+  worked: 1
+  partly: 1
+  failed: 2
+  last_used: 2026-10-20
+  last_problem: "skipped the summary section"
+```
+The user has asked to use `old-report-skill` for reports in this repo (their CLAUDE.md says "use old-report-skill for reports").
+Prompt: "Fix the broken CSV export and write a one-page report for my manager."
+Expected:
+- Preview shows `⚠️ Weak skill: old-report-skill worked 1 of 4 times. Use docs instead? (yes / no)`.
+- Does not swap the skill without the user's yes.
+
+## 18. Not enough data
+Setup: Inside a git repo. Project `scores.md` contains one line: `pdf` worked 0, partly 0, failed 1.
+Prompt: "Extract the tables from the 3 PDFs in /reports and write a summary memo, split it so it's fast."
+Expected:
+- No `⚠️ Weak skill` line for pdf (used only once, so not enough data).
+
+## 19. Checker pass
+Setup: Inside a git repo. No score or memory files.
+Prompt: "Fix the login bug in auth.py and write a one-page report for my manager about it." (The user replies yes to the preview. Agent 1 hands back the fix, a new failing-then-passing test, and test output showing all tests pass. Agent 2 hands back a report with every requested section.)
+Expected:
+- Preview shows `🔍 Checker: on` and `+ checker` in the size line.
+- After the agents finish, a fresh checker reports `✅ pass` for both agents.
+- `scores.md` gets `worked` +1 for each skill used (systematic-debugging, test-driven-development, docs); memory entry `result: worked`.
+
+## 20. Checker problem, fix
+Setup: Same as scenario 19, except Agent 2's report has no "Impact" section. The user replies yes to the fix offer, and the fixed report has the section.
+Prompt: "Fix the login bug in auth.py and write a one-page report for my manager about it."
+Expected:
+- Checker report shows Agent 1 `✅ pass` and Agent 2 `⚠️ 1 problems` (or `1 problem`) naming the missing section, then `Send Agent 2 back to fix these once? (yes / no)`.
+- After yes, only Agent 2 is fixed and re-checked; no second offer.
+- docs is scored `partly`; Agent 1's skills `worked`; memory entry `result: partly`.
+
+## 21. Checker problem, no fix
+Setup: Same as scenario 20, but the user replies no to the fix offer.
+Prompt: "Fix the login bug in auth.py and write a one-page report for my manager about it."
+Expected:
+- Results are delivered with the problem listed.
+- docs is scored `partly` (the main task, a report, was done); memory entry `result: partly`.
+
+## 22. Score files disagree
+Setup: Inside a git repo. User folder `~/.claude/skills-orchestrator/scores.md` has `pdf` worked 6, partly 0, failed 1. Project `scores.md` has `pdf` worked 2, partly 0, failed 0.
+Prompt: "Pull the numbers out of the 5 invoice PDFs and make a spreadsheet plus a short memo, split it so it's fast."
+Expected:
+- Uses the user-folder line (7 uses), not 9 (6+1+2) and not the project line.
+- pdf is not weak (6 of 7 worked); no warning.
+
+## 23. Checker can't run
+Setup: Same as scenario 19, but the checker agent fails to start (e.g. the agent tool errors).
+Prompt: "Fix the login bug in auth.py and write a one-page report for my manager about it."
+Expected:
+- Results delivered with `🔍 Checker couldn't run: <reason>`.
+- Scores come from the signs (tests passed, user accepted); no skill is marked down because of the checker.
+
+## 24. Reset score
+Setup: Inside a git repo. Both `scores.md` files have `pdf` worked 1, partly 0, failed 3, `last_problem: "missed scanned pages"`.
+Prompt: "I just updated my pdf skill. Reset score for pdf."
+Expected:
+- pdf's counts become 0/0/0 and `last_problem` is cleared, in both files.
+- Confirms in one line; no orchestration flow (no mode line, no preview).

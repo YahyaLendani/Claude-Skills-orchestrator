@@ -82,3 +82,36 @@ Prompt.
 Notes:
 - In scenario 16 the test prompt told the agent to assume "yes" when no reply was given, so it went on to install after asking. The skill's behavior (ask separately, wait) is what was checked.
 - The agents listed remaining places where they had to guess (e.g. whether a repo with no other clues counts as "no clear clues", which mode an API-docs update belongs to, the order of the end-of-job questions). These are noted as follow-ups; none caused a scenario to fail.
+
+---
+
+# Round A: all 24 scenarios with the reliability score and checker (2026-10-30)
+
+Three fresh agents (scenarios 1–8, 9–16, 17–24) followed the skill with Round A, each given a copy of the scenarios with Setup and Prompt only.
+
+**Result: 24 / 24 pass.** Scenarios 1–16 still pass (regression); on big jobs they now also show `🔍 Checker: on`, a `+ checker` size line, a checker report, and write `scores.md`.
+
+| # | Scenario | Result | Key behavior seen |
+|---|---|---|---|
+| 17 | Weak skill | PASS | Showed `⚠️ Weak skill: old-report-skill worked 1 of 4 times. Use docs instead? (yes / no)`; kept old-report-skill (user's CLAUDE.md) until the user said yes. Baseline: no warning. |
+| 18 | Not enough data | PASS | pdf has 1 use → no warning. (Found: three parallel pdf agents each added +1 — fixed below.) |
+| 19 | Checker pass | PASS | `🔍 Checker: on`, `+ checker` in size; checker report ✅ pass for both; scores `worked` +1 per skill; memory `worked`. Baseline: no checker. |
+| 20 | Checker problem, fix | PASS | ⚠️ 1 problem (missing Impact), one fix offer, only Agent 2 re-checked; docs `partly`; memory `partly`. Baseline: caught by chance. |
+| 21 | Checker problem, no fix | PASS | Delivered with the problem listed; docs `partly` (main task done); memory `partly`. |
+| 22 | Score files disagree | PASS | Used the 7-use line (6 of 7), no warning, no adding. Baseline: never read scores. |
+| 23 | Checker can't run | PASS | `🔍 Checker couldn't run: …`; scored from the signs; nothing marked down. |
+| 24 | Reset score | PASS | pdf 0/0/0, `last_problem` cleared, both files; one-line confirmation; no mode line or preview. |
+
+Scenarios 1–16: PASS — same behavior as the earlier run (mode lines, previews, memory, drafts, safety rules), now with checker reports on big jobs and score updates after each orchestrated job.
+
+## Fixes made from this run
+
+The runs showed five places where the scores could go wrong or the agent had to guess. Each got a failing structure test first, then the fix (suite 114/114 after). Scenarios 7, 17, 18 and 22 were re-run on a fresh agent afterwards and behaved as intended.
+
+| Problem | Fix | Test | Re-run check |
+|---|---|---|---|
+| A skill used by several parallel agents got +1 per agent (pdf +3 from one job), so one job could make a skill look weak | Count each skill once per job, using the worst result among the agents that used it | `test_once_per_job_worst_result` | 7, 18: pdf +1 |
+| Each file got its own +1, so the two files kept drifting apart | Start from the line read (more uses), add this job, write that same line to both files | `test_write_same_line_to_both` | 22: both files 7/0/1 |
+| Unclear whether to warn about a weak skill the user's CLAUDE.md asks for | Still warn; the user's answer decides | `test_weak_flag_even_when_user_named_it` | 17: warning shown |
+| Unclear what happens to `last_problem` after a later success | Keep it (it records the last time something went wrong) | `test_last_problem_kept_on_worked` | 18: kept |
+| No wording for the scores first-time notice | One line for both files when both are new | `test_one_notice_for_both_files` | 7: one combined notice |

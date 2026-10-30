@@ -1,6 +1,6 @@
 ---
 name: skills-orchestrator
-description: Use when a task needs two or more skills, or has separate parts that could be split across multiple agents — for coding work (bugs, features, tests, reviews), documents and business work (reports, slides, spreadsheets, PDFs, research), or a mix of both, such as "fix this bug and write a report for my manager". Also use when no installed skill fits part of a task, or when two skills give conflicting instructions.
+description: Use when a task needs two or more skills, or has separate parts that could be split across multiple agents — for coding work (bugs, features, tests, reviews), documents and business work (reports, slides, spreadsheets, PDFs, research), or a mix of both, such as "fix this bug and write a report for my manager". Also use when no installed skill fits part of a task, when two skills give conflicting instructions, or when the user says "reset score for <skill>".
 ---
 
 # Skills Orchestrator
@@ -35,23 +35,23 @@ worked. Works in two modes, chosen automatically: **coding** and
    - with the location fallback: `Mode: coding (chosen because we're in a code repository)`.
 
    If the task is too unclear to plan (e.g. "make this better" with no target), ask one focused question after the mode line and wait for the answer.
-3. **Check memory.** Follow [memory](features/memory.md) "Using memory": read both memory files and look for a recipe from a similar past task.
-4. **Pick the skills.** For each part of the task, use the mode's `## Preferred skills` and the closest installed match. If nothing fits a part, follow [new skills](features/new-skills.md).
+3. **Check memory and scores.** Follow [memory](features/memory.md) "Using memory": read both memory files and look for a recipe from a similar past task. Also read both `scores.md` files ([reliability](features/reliability.md)).
+4. **Pick the skills.** For each part of the task, use the mode's `## Preferred skills` and the closest installed match. If nothing fits a part, follow [new skills](features/new-skills.md). Check each chosen skill's score: flag a weak skill for the preview with a suggested replacement, and when two skills fit equally, pick the higher score (see "Weak skills" in [reliability](features/reliability.md)).
    - A part that is simple enough to do well without a skill (e.g. a small docs edit, a quick throwaway prototype) gets `skills: none`. Draft a skill only when the part needs special steps that no installed skill covers.
 5. **Settle conflicts** between the chosen skills with [conflicts](features/conflicts.md).
 6. **Show the preview** for big jobs, using [preview](features/preview.md). Wait for `yes` before any work starts.
 7. **Run.** Start one agent per part. Give each agent:
    - its task, in a few clear sentences;
    - the names of its skills, plus only the skill files it needs (no full chat history);
-   - what to hand back.
+   - what to hand back. On big jobs, include evidence: test output, changed file paths, created files, and evidence for each of its skills' key rules (e.g. for test-driven-development, the test output failing before the fix and passing after).
 
    Never copy a password, token or API key into anything an agent writes (documents, notes, code, commits). Give it only to the agent that needs it, to use while it runs.
 
    Give a part its own agent only when it can run in parallel with others, needs a different mode, or is big enough to benefit from a fresh agent. Short steps that run one after another in the same mode stay with one agent (e.g. find the bug → fix it → test it).
 
    Agents that don't depend on each other run in parallel. An agent that needs another agent's output runs after it and receives that output (e.g. the report agent gets the bug fix and test results).
-8. **Combine** the agents' results into one answer for the user: what was done, by which agent, and anything that still needs their attention.
-9. **Save to memory.** For big jobs, and for any job that failed or partly worked, follow [memory](features/memory.md) "Entry format" and "Judging the result". If a draft skill was used, follow "After the job" in [new skills](features/new-skills.md).
+8. **Check and combine.** On big jobs, run the checker first ([checker](features/checker.md)): show its report and, if it found problems, the one-fix offer. Then combine the agents' results into one answer for the user: what was done, by which agent, and anything that still needs their attention.
+9. **Save to memory.** For big jobs, and for any job that failed or partly worked, follow [memory](features/memory.md) "Entry format" and "Judging the result". If a draft skill was used, follow "After the job" in [new skills](features/new-skills.md). For every orchestrated job, update both `scores.md` files: each skill used in the job gets one result, counted once per job (see "Counting" in [reliability](features/reliability.md)).
 
 ## Switching modes
 
