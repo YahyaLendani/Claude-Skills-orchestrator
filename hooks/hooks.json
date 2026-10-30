@@ -1,0 +1,15 @@
+{
+  "description": "Tells Claude that Skills Orchestrator is available",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Skills Orchestrator is installed. If this task needs two or more skills, or has parts that could run as separate agents, read and follow the skills-orchestrator skill. For a simple one-skill task, ignore this line.'"
+          }
+        ]
+      }
+    ]
+  }
+}
