@@ -114,3 +114,7 @@ def test_round_b_flow():
     flow = section(text(), "## Flow")
     for s in ["card", "fit check", "trimmed", "board", "job folder"]:
         assert s in flow, s
+
+
+def test_repo_alone_does_not_force_coding_part():  # Task 7 fix
+    assert "only counts toward coding when the task has a coding part" in section(text(), "## Flow")

@@ -10,7 +10,7 @@ changed. Uses the skill's card (`features/cards.md`).
 - For each agent, pick the card `parts` whose `covers` match that agent's task.
 - The skill is given whole instead when:
   - no part matches the task;
-  - the chosen sections are over 80% of the skill (trimming would save little);
+  - the chosen sections are over 80% of the skill's lines (trimming would save little);
   - the skill has no `## ` headings (its card has `parts: []`), so there is nothing to pick.
 - When two or more agents use the same big skill, make one copy per agent, each with that agent's own sections.
 

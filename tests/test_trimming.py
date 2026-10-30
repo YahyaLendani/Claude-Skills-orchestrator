@@ -53,3 +53,7 @@ def test_preview_marker():
 
 def test_never_edit_original():
     assert "Never edit the original skill" in text()
+
+
+def test_80_percent_by_lines():  # Task 7 fix
+    assert "80% of the skill's lines" in section(text(), "## When to trim")

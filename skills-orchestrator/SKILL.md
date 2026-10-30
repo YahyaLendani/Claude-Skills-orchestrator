@@ -28,6 +28,7 @@ worked. Works in two modes, chosen automatically: **coding** and
 2. **Pick the mode.** Read the `## Clues` of [coding](modes/coding.md) and [documents](modes/documents.md).
    - Clues point one way → that mode.
    - Clues point both ways → split the task into parts; each part gets its own mode and its own agent.
+   - Being inside a code repository only counts toward coding when the task has a coding part. A documents-only task in a repo (e.g. "summarise these PDFs") is documents mode, with no coding part to split off.
    - No clear clues → use the location (inside a code repository → coding, otherwise documents) and say why.
 
    Show one line before anything else:

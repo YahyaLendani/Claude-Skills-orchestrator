@@ -115,3 +115,32 @@ The runs showed five places where the scores could go wrong or the agent had to 
 | Unclear whether to warn about a weak skill the user's CLAUDE.md asks for | Still warn; the user's answer decides | `test_weak_flag_even_when_user_named_it` | 17: warning shown |
 | Unclear what happens to `last_problem` after a later success | Keep it (it records the last time something went wrong) | `test_last_problem_kept_on_worked` | 18: kept |
 | No wording for the scores first-time notice | One line for both files when both are new | `test_one_notice_for_both_files` | 7: one combined notice |
+
+---
+
+# Round B: all 32 scenarios with cards, trimming and the board (2026-10-30)
+
+Four fresh agents (scenarios 1–8, 9–16, 17–24, 25–32) followed the skill with Round B, each given a copy of the scenarios with Setup and Prompt only.
+
+**Result: 32 / 32 pass.** Scenarios 1–24 still pass (regression); multi-agent jobs now also make cards, show `🧩 Fit` for dependent agents, and use a board that is deleted at the end.
+
+| # | Scenario | Result | Key behavior seen | Baseline |
+|---|---|---|---|---|
+| 25 | First card | PASS | Wrote `~/.claude/skills-orchestrator/cards/pdf.md` with all 8 fields, parts Reading PDFs / Making PDFs | no card |
+| 26 | Card refresh | PASS | Case A reused the card; case B rebuilt it with fingerprint `77b0e4d1c9aa` | never read cards |
+| 27 | Fit warning | PASS | `🧩 Fit: Agent 2 needs root cause / test results, Agent 1's skills don't produce it. Add that to Agent 1's task? (yes / no)` | no fit line |
+| 28 | Big skill trimmed | PASS | One trimmed copy per agent with Reading PDFs + OCR + `## Key rules`; preview `(trimmed: Reading PDFs, OCR)` | whole 400-line skill to every agent |
+| 29 | Small skill whole | PASS | 90-line memo-style given whole, no marker | (trivial) |
+| 30 | Board finding | PASS | `[Agent 1] finding: sessions now expire after 30 minutes…`; Agent 2 used it; finding in memory note; job folder deleted | guide kept old wording |
+| 31 | Board blocker | PASS | Unanswered blocker shown in the combined answer | no board |
+| 32 | Checker uses card | PASS | Checker used the TDD card's key rules to flag the missing failing run | read the whole skill |
+
+## Fixes made from this run
+
+The agents reported three places where they had to guess. Each got a failing structure test first (suite 162/162 after):
+
+| Gap | Fix | Test |
+|---|---|---|
+| A documents-only task inside a repo: "clues point both ways" but no coding part | Being in a repo only counts toward coding when the task has a coding part | `test_repo_alone_does_not_force_coding_part` |
+| Is "test only shown passing" a broken rule or missing evidence? | Evidence showing the rule wasn't followed = broken rule; evidence simply absent = missing evidence | `test_broken_rule_vs_missing_evidence` |
+| "80% of the skill" — measured how? | By the skill's lines | `test_80_percent_by_lines` |

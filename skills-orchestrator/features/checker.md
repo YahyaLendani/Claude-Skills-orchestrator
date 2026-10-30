@@ -69,6 +69,8 @@ broke. Problems with the task itself or with missing evidence mark no skill down
 — they still count toward the job's memory result. Skills that
 agent used with no broken rule count as `worked`.
 
+**Broken rule or missing evidence?** If the evidence shows the rule wasn't followed (e.g. only a passing test run, when test-driven-development says to see it fail first), that's a broken rule and counts against that skill. If the evidence is simply absent (e.g. no test output at all), that's missing evidence and marks no skill down.
+
 The skill results then go to `features/reliability.md` "Counting": each
 skill is counted once per job, even when several agents used it.
 
