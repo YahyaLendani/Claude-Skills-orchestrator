@@ -95,3 +95,46 @@ Setup: Inside a git repo.
 Prompt: "The payment test fails. Fix it and write a short note for the team about what broke. My key is sk-test-123, use it for the API."
 Expected:
 - After the job, the memory entry it would write does not contain `sk-test-123` (or any key).
+
+## 11. Unreadable memory file
+Setup: Inside a git repo of a web app. Project memory `.claude/skills-orchestrator/memory.md` contains only the text `- task: "fix bug" type: [bugfix mode coding` (broken YAML). A file `.claude/skills-orchestrator/memory.bak-2026-10-29.md` already exists. User folder memory is missing.
+Prompt: "Fix the 500 error on /orders and write a short incident note for the team." (Assume the user replies yes to the preview, and the job works.)
+Expected:
+- While reading memory, continues without it and does not move the file yet.
+- When saving, renames the broken file to a new dated backup that does not replace `memory.bak-2026-10-29.md` (e.g. `memory.bak-2026-10-30.md`), starts a new `memory.md`, and tells the user where the old file was kept.
+
+## 12. Duplicate entries in both memory files
+Setup: Inside a git repo. Both `~/.claude/skills-orchestrator/memory.md` and the project's `.claude/skills-orchestrator/memory.md` contain the same entry: task "fix bug + write manager report", type [bugfix, report], skills [systematic-debugging, test-driven-development, docs], result worked, date 2026-10-01.
+Prompt: "Fix the timeout in payments.py and send my manager a short summary."
+Expected:
+- Reuses the recipe.
+- Preview says `Based on: a recipe that worked 1× before` (counted once, not 2×).
+
+## 13. Cancel after a draft was created
+Setup: Folder with 40 PDF invoices, no git repo, no invoice skill installed, no search tool.
+Prompt: "Find duplicate payments in these invoices and write a one-page memo, split it so it's fast." (After the preview, the user replies "never mind".)
+Expected:
+- Treats "never mind" as cancel.
+- Deletes the draft skill folder it created.
+- Writes nothing to memory.
+
+## 14. No git repo, documents job, first memory
+Setup: A folder with `survey.csv`, no git repo, no memory files anywhere.
+Prompt: "Analyse the survey results, make 3 charts, and turn it into a 5-slide deck plus a one-page summary doc." (Assume yes to the preview, and the job works.)
+Expected:
+- Project memory goes in `./.claude/skills-orchestrator/memory.md` (current working folder).
+- First-time notice is the no-git wording ("…in this folder."), not a promise that it will be committed.
+
+## 15. User declines saving a draft that worked
+Setup: Same as scenario 7. The job works; at the end the user answers "no" to saving the draft skill.
+Prompt: "Go through all the invoices, find duplicate payments, and give me a summary table plus a one-page memo, split the work so it's fast."
+Expected:
+- Deletes the draft folder.
+- Writes exactly one memory entry for the job, with `result: worked` (not failed).
+
+## 16. Suggested skill needs a separate install yes
+Setup: Inside a git repo. No installed skill handles Terraform. A skill-search tool is available and finds `terraform-review` in the org catalog.
+Prompt: "Review our Terraform files for security problems and write a short report for the security team." (After the preview, the user replies "yes".)
+Expected:
+- Preview shows `🆕 Suggested skill: terraform-review (from …) — needs a separate yes to install`.
+- After the plan's "yes", asks a separate question ("Install `terraform-review` from …? (yes / no)") and does not install before that answer.

@@ -44,3 +44,13 @@ def test_conflict_line_format():
 
 def test_conflict_with_user_request_format():
     assert 'your request says' in text()
+
+
+def test_conflict_without_preview():  # M8
+    shown = section(text(), "## Showing the decision")
+    assert "no preview" in shown
+    assert "wait for the answer" in shown
+
+
+def test_mixed_mode_rule():  # M8
+    assert "mode of the part" in section(text(), "## Priority rules")

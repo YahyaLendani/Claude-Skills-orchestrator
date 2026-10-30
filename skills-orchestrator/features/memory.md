@@ -6,7 +6,13 @@ task, how the work was split, and whether it worked. Read it before planning
 
 ## Entry format
 
-One entry per big job (a job that showed the preview). Append it to the list.
+Write one entry per job, at the end, after you have given the user the combined result:
+
+- **Big jobs** (ones that showed the preview): always.
+- **Other orchestrated jobs** (mode line shown, no preview): only when the result is `failed` or `partly`, so the lesson isn't lost.
+
+If the user reacts later in the same session (accepts it, or asks for fixes),
+update that entry's `result` and `note` instead of writing a new one.
 
 ```yaml
 - task: "fix bug + write manager report"
@@ -65,7 +71,7 @@ Before planning:
 2. Find entries whose `type` tags match this task's tags.
 3. If one has `result: worked`, start from its recipe (same skills, same split) and apply its `note`.
 4. If one has `result: failed`, do not repeat that recipe; read its `note` to see what went wrong.
-5. Say so in the preview: `Based on: a recipe that worked 3× before` (count matching `worked` entries), or `Based on: no earlier recipe`.
+5. Say so in the preview: `Based on: a recipe that worked 3× before`, or `Based on: no earlier recipe`. When counting, count each entry once: an entry with the same task, date and skills in both files is one entry.
 
 A recipe is a starting point, not a rule. If this task is clearly different,
 change the plan and say why in one line.
@@ -73,7 +79,7 @@ change the plan and say why in one line.
 ## Limits
 
 - Store short summaries only. Never store file contents, passwords, keys, tokens, or personal data.
-- Keep at most 5 entries per task type. When a type has more, drop the oldest.
+- Keep at most 5 entries per task type in each file. When you write a file and a type has more, drop that file's oldest entries of that type.
 - Keep each entry to the 8 fields above.
 
 ## Where it lives
@@ -81,16 +87,22 @@ change the plan and say why in one line.
 Memory is kept in two places:
 
 - **User folder:** `~/.claude/skills-orchestrator/memory.md` — shared across all of the user's projects on this computer.
-- **Project:** `.claude/skills-orchestrator/memory.md` — inside the project, so it is saved with the project in git and survives temporary cloud sessions.
+- **Project:** `.claude/skills-orchestrator/memory.md` — inside the project, so it can be committed with it and survive temporary cloud sessions (see "Problems").
 
 **Reading:** read both and merge them, project entries first.
 
 **Writing:** write the new entry to both files when the user folder is
 available and writable. Otherwise write to the project only.
 
-If there is no git repository (common in documents mode), the project file
-goes under the current working folder:
-`<current working folder>/.claude/skills-orchestrator/memory.md`.
+**Where the project `.claude/` folder goes:** at the top of the repository
+(the folder that holds `.git`), even when you are working in a subfolder. If
+there is no git repository (common in documents mode), it goes in the current
+working folder: `<current working folder>/.claude/skills-orchestrator/memory.md`.
+Drafts and saved skills use the same `.claude/` folder.
+
+**Working in the home folder:** if the project folder is the user's home folder,
+the project file and the user-folder file are the same file. Read it once and
+write it once.
 
 ## Problems
 
@@ -101,5 +113,5 @@ goes under the current working folder:
   - No git repository: "I'm saving what worked to `.claude/skills-orchestrator/memory.md` in this folder."
 - **Cloud sessions:** a temporary cloud container is deleted when the session ends, so project memory only survives once it's committed. If the project file has changes that are not committed yet when you finish a job, say so in one line and offer to include it in the commit.
 - **Memory file unreadable** (see "File layout"): never overwrite it. When reading, just continue without it. Rename it only when you are about to save: rename it to `memory.bak-<YYYY-MM-DD>.md` in the same folder (add `-2`, `-3`… if that name is taken; never replace an existing backup), start a new `memory.md`, and tell the user in one line where the old file was kept.
-- **Same entry in both files:** when merging, entries with the same task and date count once.
+- **Same entry in both files:** when merging, entries with the same task, date and skills count once.
 - **Secrets in the request:** if the user's message contains a password, token or API key, leave out the secret when writing `task` and `note`. Describe it in general words ("used the user's API key"), never the value.

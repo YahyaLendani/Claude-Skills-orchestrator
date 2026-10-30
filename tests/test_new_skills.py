@@ -48,3 +48,13 @@ def test_save_checks_existing_folder():
     t = text()
     assert "already exists" in t
     assert "Save `<name>` as a permanent skill in `~/.claude/skills/` and `.claude/skills/`?" in t
+
+
+def test_leftover_drafts_cleaned():  # M2
+    t = text()
+    assert "left over from an earlier job" in t
+    assert "never include the drafts folder in a commit" in t
+
+
+def test_where_dot_claude_goes():  # M4
+    assert "top of the repository" in text()

@@ -57,7 +57,7 @@ def test_unreadable_file_moved_only_when_saving():
 
 
 def test_duplicates_counted_once():
-    assert "same task and date" in text()
+    assert "same task, date and skills" in text()
 
 
 def test_secrets_left_out():
@@ -91,3 +91,27 @@ def test_notice_does_not_promise_commit():
     assert "not committed yet" in t
     assert "offer to include it" in t
     assert ".gitignore" in t
+
+
+def test_home_folder_writes_once():  # M3
+    assert "home folder" in text()
+    assert "write it once" in text()
+
+
+def test_where_dot_claude_goes():  # M4
+    assert "top of the repository" in section(text(), "## Where it lives")
+
+
+def test_entry_updated_after_user_reacts():  # M5
+    t = text()
+    assert "after you have given the user the combined result" in t
+    assert "update that entry" in t
+
+
+def test_counting_and_pruning_rules():  # M6
+    assert "count each entry once" in section(text(), "## Using memory")
+    assert "in each file" in section(text(), "## Limits")
+
+
+def test_small_failed_jobs_recorded():  # M7
+    assert "only when the result is `failed` or `partly`" in section(text(), "## Entry format")

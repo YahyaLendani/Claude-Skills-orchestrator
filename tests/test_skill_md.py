@@ -74,3 +74,9 @@ def test_unclear_task_asks_one_question():
 
 def test_secrets_stay_out_of_agent_outputs():
     assert "Never copy a password, token or API key" in section(text(), "## Flow")
+
+
+def test_trigger_not_too_broad():  # M10
+    fm = frontmatter("SKILL.md")
+    assert "several steps" not in fm["description"]
+    assert "several steps" not in section(text(), "## When to use")

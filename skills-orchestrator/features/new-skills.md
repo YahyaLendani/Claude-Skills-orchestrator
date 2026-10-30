@@ -20,13 +20,16 @@ If no search tool is available, or nothing fits, go to "Draft a skill".
 ## Draft a skill
 
 1. Pick a short lowercase name with hyphens that says what it does, e.g. `duplicate-invoice-check`.
-2. Write it to `.claude/skills-orchestrator/drafts/<name>/SKILL.md` with:
+2. Write it to `.claude/skills-orchestrator/drafts/<name>/SKILL.md` (that `.claude/` folder is at the top of the repository, or the current working folder when there is no repository; see `features/memory.md`) with:
    - frontmatter `name: <name>` and a `description` that starts with "Use when";
    - the steps for this kind of subtask, written so another agent can follow them;
    - what the agent must hand back (its output).
 3. Keep it short and focused on this one kind of subtask (aim for under 60 lines).
 4. Give it to the agent doing that subtask, like any other skill.
 5. Label it in the preview: `🆕 Draft skill: <name> (created for this task)`.
+6. Drafts are temporary: never include the drafts folder in a commit. At the
+   start of a new job, delete any draft left over from an earlier job that was
+   never saved (for example because the user never answered the preview).
 
 ## After the job
 

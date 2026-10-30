@@ -1,6 +1,6 @@
 import re
 
-from helpers import read_skill_file
+from helpers import read_skill_file, section
 
 PATH = "features/preview.md"
 
@@ -44,7 +44,7 @@ def test_cancel_deletes_draft():
 
 def test_size_words_do_not_overlap():
     t = text()
-    assert "`small` — 2 agents with short tasks" in t
+    assert "`small` — 1–2 agents with short tasks" in t
     assert "`medium` — 3 agents, or 2 agents with longer tasks" in t
     assert "`large` — 4 or more agents" in t
 
@@ -53,3 +53,11 @@ def test_plan_yes_is_not_install_consent():
     t = text()
     assert "🆕 Suggested skill:" in t
     assert "separate yes" in t
+
+
+def test_no_and_stop_mean_cancel():  # M1
+    assert '"no", "stop" or "never mind"' in section(text(), "## Replies")
+
+
+def test_edit_dropping_draft_deletes_it():  # M2
+    assert "drops the agent that uses a draft" in section(text(), "## Replies")

@@ -122,7 +122,7 @@ contents, passwords or keys.
 - **Structure checks:** `python3 -m pytest` checks that every file exists
   and contains the agreed rules (paths, reply options, rule order, and so on).
   Needs `pytest` and `pyyaml`.
-- **Behavior checks:** `tests/scenarios.md` lists 10 scenarios. Each one is
+- **Behavior checks:** `tests/scenarios.md` lists 16 scenarios (the last 6 cover the safety rules). Each one is
   run on a fresh agent without the skill (`tests/results/baseline.md`) and
   with it (`tests/results/with-skill.md`) to show that the skill changes
   behavior.
