@@ -48,3 +48,37 @@ The agents reported places where the skill left them guessing. Each got a failin
 | No instruction for tasks too unclear to plan | Ask one focused question after the mode line | `test_unclear_task_asks_one_question` |
 
 The fixes change wording the scenarios already passed with; they were not re-run. The split rule means scenario 3 (data → deck, both documents) would now likely run as one agent with no preview, which is cheaper and still meets its Expected lines.
+
+---
+
+# Re-run after the review fixes (2026-10-30)
+
+After the final review's fixes and the remaining minor fixes, all 16 scenarios
+(the original 10 plus 6 new safety scenarios) were run again on two fresh
+agents with the skill and a copy of the scenarios showing only Setup and
+Prompt.
+
+**Result: 16 / 16 pass.**
+
+| # | Scenario | Result | Key behavior seen |
+|---|---|---|---|
+| 1 | Simple one-skill task | PASS | No mode line, no preview, no memory |
+| 2 | Pure coding task | PASS | `Mode: coding`; debugging + TDD; one agent (steps in a row), no preview |
+| 3 | Pure documents task | PASS | `Mode: documents`; xlsx + dataviz + pptx; one agent, no preview |
+| 4 | Mixed task | PASS | `Mode: coding + documents`; 2 agents (fix → report); preview; waited |
+| 5 | Unclear task | PASS | Location fallback line, then one focused question |
+| 6 | Similar task run twice | PASS | Reused recipe, applied its note, `Based on: a recipe that worked 1× before` |
+| 7 | No skill fits | PASS | Drafted `duplicate-invoice-check`, labeled it, offered to save, checked for existing folders |
+| 8 | Two skills disagree | PASS | `⚖️ Conflict: … your request says … → using your request` |
+| 9 | Big job | PASS | 2-agent preview with `Reply: yes / edit / cancel`; waited |
+| 10 | Secret in the request | PASS | Key given to the fix agent only; memory says "used the user's API key", never the value |
+| 11 | Unreadable memory file | PASS | Continued without it while reading; at save, renamed to `memory.bak-2026-10-30.md` (kept the 10-29 backup) and told the user |
+| 12 | Duplicate entries in both files | PASS | Counted once: `Based on: a recipe that worked 1× before` |
+| 13 | Cancel after a draft | PASS | "never mind" treated as cancel; deleted the draft; nothing saved to memory |
+| 14 | No git repo, documents job | PASS | Memory in `<cwd>/.claude/skills-orchestrator/memory.md`; no-git notice wording |
+| 15 | User declines saving a draft | PASS | Deleted the draft; one memory entry with `result: worked` |
+| 16 | Suggested skill install | PASS | `🆕 Suggested skill: … — needs a separate yes to install`; asked the install question after the plan's yes |
+
+Notes:
+- In scenario 16 the test prompt told the agent to assume "yes" when no reply was given, so it went on to install after asking. The skill's behavior (ask separately, wait) is what was checked.
+- The agents listed remaining places where they had to guess (e.g. whether a repo with no other clues counts as "no clear clues", which mode an API-docs update belongs to, the order of the end-of-job questions). These are noted as follow-ups; none caused a scenario to fail.
