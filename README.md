@@ -71,7 +71,35 @@ split across agents:
 
 For simple one-skill tasks it stays out of the way.
 
+**On demand:** `/orchestrate <task>` runs the same flow on a task that would
+otherwise look too small, when you want the plan, the checker and the memory
+entry anyway.
+
+**At session start:** one line reminds Claude the skill is installed and what
+kind of task it is for, then says to ignore it for a simple one-skill task.
+Delete the `SessionStart` entry in `hooks/hooks.json` if you would rather not
+have it.
+
 ## Install
+
+Two ways in. The plugin is easier and updates itself. Copying the folder is
+the manual option, and it gives you the skill on its own.
+
+**As a plugin** (recommended):
+
+```bash
+/plugin marketplace add YahyaLendani/Skills-orchestrator
+/plugin install skills-orchestrator@skills-orchestrator
+```
+
+That installs the skill, the `/orchestrate` command, the `checker` agent, and a
+one-line reminder at the start of each session. Update it with `/plugin update
+skills-orchestrator`. To try a local checkout without installing anything:
+`claude --plugin-dir /path/to/Skills-orchestrator`.
+
+Both commands need access to this repository, which is private for now.
+
+**By copying the folder** (the skill only):
 
 The skill is the `skills-orchestrator/` folder in this repo. It contains only
 Markdown files, with no scripts.
@@ -94,6 +122,13 @@ mkdir -p .claude/skills && rm -rf .claude/skills/skills-orchestrator && cp -r /p
 
 The `rm -rf` removes an older copy first, so updating works the same way as installing. Start a new Claude Code session afterwards so the skill is picked up.
 
+A copied install gets the skill but not the command, the checker agent or the
+startup line. The checker then falls back to a fresh general-purpose agent
+with the same instructions, which is what it always did before the plugin
+existed.
+
+Current version: 1.3.0.
+
 ## How it compares
 
 Several existing skills cover parts of this idea. None of them cover all of it.
@@ -113,8 +148,14 @@ Several existing skills cover parts of this idea. None of them cover all of it.
 **One skill folder, with supporting files.** `SKILL.md` holds the main flow.
 Each mode and each feature has its own small file, read only when a step
 needs it. That keeps Claude's context small, makes the skill easy to install
-(copy one folder), and lets later features be added as new files. The layout
-can grow into a full plugin later.
+(copy one folder), and lets later features be added as new files.
+
+**Packaged as a plugin, but the skill still works alone.** The plugin adds the
+command, the checker agent and the startup line; the skill folder is unchanged,
+so copying it into `~/.claude/skills/` still gives you the same rules and the
+same behavior. Memory, scores and cards never live in the plugin folder,
+because an update replaces that folder; they stay in
+`~/.claude/skills-orchestrator/` and `.claude/skills-orchestrator/` as before.
 
 **Memory is stored in both the user folder and the project.**
 
@@ -181,11 +222,11 @@ note and the job folder is deleted, so nothing piles up or gets committed.
   Install the test tools once with `pip install -r requirements-dev.txt`
   (`pytest` and `pyyaml`). The same checks run on every push and pull request
   in CI, on Linux and Windows.
-- **Behavior checks:** `tests/scenarios.md` lists 32 scenarios (11–16 cover the safety rules, 17–24 the reliability score and checker, 25–32 cards, trimming and the board). Each one is
-  run on a fresh agent without the feature (`tests/results/baseline.md`,
-  `tests/results/round-a-baseline.md`, `tests/results/round-b-baseline.md`) and with it (`tests/results/with-skill.md`) to show that the skill changes
-  behavior.
+- **Behavior checks:** `tests/scenarios.md` lists 40 scenarios (11–16 cover the safety rules, 17–24 the reliability score and checker, 25–32 cards, trimming and the board, 33–40 the plugin, the startup line, `/orchestrate` and the checker agent). Scenarios 1–32 have recorded before and after runs (`tests/results/baseline.md`,
+  `tests/results/round-a-baseline.md`, `tests/results/round-b-baseline.md`,
+  `tests/results/with-skill.md`) showing that the skill changes behavior. The
+  runs for 33–40 are still to be recorded.
 
 ## Coming later
 
-- **Startup hook and `/orchestrate` command:** turning the skill into a full plugin, so it's active in every session.
+- **Submitting to the plugin directory:** once the repository is public.

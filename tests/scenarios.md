@@ -258,3 +258,64 @@ Setup: Inside a git repo. `test-driven-development` has a current card with `key
 Prompt: "Fix the price rounding bug and write release notes for it."
 Expected:
 - The checker uses the card's key rules and reports for Agent 1 that the test was not seen failing before the fix (test-driven-development rule).
+
+## 33. Startup line, simple task
+Setup: Plugin installed (`skills-orchestrator` 1.3.0). The SessionStart hook printed its line at the start of the session. The task needs one skill and nothing else.
+Prompt: "Rename `usr` to `user` in helpers.py."
+Expected:
+- The hook's line is in context and is ignored.
+- No `Mode:` line, no preview, no memory entry, no scores written: the orchestrator stays out of the way, exactly as without the plugin.
+
+## 34. Forced run
+Setup: Plugin installed. The task would normally be too small to orchestrate.
+Prompt: "/orchestrate rename `usr` to `user` in helpers.py"
+Expected:
+- Flow step 1 is skipped and the flow runs: `Mode: coding` is shown.
+- One agent, no draft or suggested skill, so no preview.
+- `scores.md` gets one result for the skill used, counted once for the job.
+- No memory entry, because the job is small and worked.
+
+## 35. No task
+Setup: Plugin installed.
+Prompt: "/orchestrate"
+Expected:
+- One focused question about what the task is, then it waits.
+- No `Mode:` line and no plan before the answer.
+
+## 36. Named checker
+Setup: Plugin installed. A big job with two agents, one coding and one writing a report.
+Prompt: "Fix the login bug and write a one-page manager report about it."
+Expected:
+- After the preview and the agents, the checker runs as `skills-orchestrator:checker`.
+- Its report uses the agreed format: `🔍 Checker report`, one line per agent with `✅ pass` or `⚠️ <n> problems`, then the one-fix offer.
+- Only the skill whose rule broke is marked down.
+
+## 37. Copy install
+Setup: The skill is copied to `~/.claude/skills/skills-orchestrator`. No plugin, so no command, agent or startup line exists.
+Prompt: "Fix the login bug and write a one-page manager report about it."
+Expected:
+- No startup line, nothing missing from the flow.
+- The checker runs as a fresh general-purpose agent given the same instructions, and reports in the same format.
+
+## 38. Hook removed
+Setup: Plugin installed, and the `SessionStart` entry has been deleted from `hooks/hooks.json`.
+Prompt: "Fix the login bug and write a one-page manager report about it."
+Expected:
+- No startup line.
+- Everything else is unchanged: mode line, preview, agents, checker, scores.
+
+## 39. Nothing in the plugin folder
+Setup: Plugin installed. `memory.md` and `scores.md` exist in both places, and cards exist in `~/.claude/skills-orchestrator/cards/`. A big job is about to run.
+Prompt: "Refactor the invoice parser and write the changelog entry."
+Expected:
+- Memory, scores and cards are read and written only in `~/.claude/skills-orchestrator/` and `.claude/skills-orchestrator/`.
+- Nothing is written inside the plugin's install folder, so a plugin update cannot lose any of it.
+
+## 40. Version bump
+Setup: The plugin is installed at 1.2.0. `plugin.json` now says 1.3.0 and the release is published.
+Prompt: "/plugin update skills-orchestrator", then a big job.
+Expected:
+- The new version is shown.
+- The `/orchestrate` command, the checker agent and the startup line are available.
+- Existing memory, scores and cards are kept.
+

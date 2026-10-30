@@ -1,0 +1,16 @@
+{
+  "name": "skills-orchestrator",
+  "owner": {
+    "name": "Yahya Lendani"
+  },
+  "description": "Skills Orchestrator: one skill that picks and combines the others.",
+  "plugins": [
+    {
+      "name": "skills-orchestrator",
+      "source": "./",
+      "description": "Picks and combines the right skills for a task, and splits big jobs across agents.",
+      "category": "workflow",
+      "tags": ["skills", "orchestration", "subagents"]
+    }
+  ]
+}

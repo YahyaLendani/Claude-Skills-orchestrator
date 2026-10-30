@@ -1,0 +1,14 @@
+{
+  "name": "skills-orchestrator",
+  "displayName": "Skills Orchestrator",
+  "version": "1.3.0",
+  "description": "Picks and combines the right skills for a task, splits big jobs across agents with their own skills, and learns from what worked.",
+  "author": {
+    "name": "Yahya Lendani"
+  },
+  "homepage": "https://github.com/YahyaLendani/Skills-orchestrator",
+  "repository": "https://github.com/YahyaLendani/Skills-orchestrator",
+  "license": "MIT",
+  "keywords": ["skills", "orchestration", "agents", "subagents", "workflow"],
+  "skills": ["./skills-orchestrator"]
+}

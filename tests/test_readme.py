@@ -34,9 +34,14 @@ def test_memory_decision_explained():
 
 def test_coming_later():
     later = section(text(), "## Coming later").lower()
-    assert "startup hook" in later
-    for s in ["reliability score", "checker agent", "skill cards", "shared board", "cutting big skills"]:
+    assert "plugin directory" in later
+    for s in ["startup hook", "reliability score", "checker agent", "skill cards", "shared board", "cutting big skills"]:
         assert s not in later, s
+
+
+def test_readme_round_c():
+    what = section(text(), "## What it does")
+    assert "/orchestrate" in what and "session start" in what.lower()
 
 
 def test_readme_round_a():
