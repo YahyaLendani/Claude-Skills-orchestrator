@@ -288,7 +288,9 @@ removed from `hooks/hooks.json`.
   checker agent). Scenarios 1–32 have recorded before and after runs
   (`tests/results/baseline.md`, `tests/results/round-a-baseline.md`,
   `tests/results/round-b-baseline.md`, `tests/results/with-skill.md`) showing
-  that the skill changes behavior. The runs for 33–40 are still to be recorded.
+  that the skill changes behavior. The runs for 33–40 are still to be recorded;
+  `tests/tools/` holds the harness that runs them (one session per scenario,
+  a throwaway project, and the hook log as evidence).
 - **Plugin packaging:** `claude plugin validate . --strict` passes, and the
   manifest's own shape is covered by the pytest suite.
 
