@@ -84,3 +84,13 @@ def test_blame_only_the_broken_rule():  # Final I5
     v = section(text(), "## Verdict and score")
     assert "only the skill whose rule" in v
     assert "mark no skill down" in v
+
+
+def test_checker_uses_card_rules():
+    c = section(text(), "## Checks")
+    assert "key_rules" in c and "features/cards.md" in c
+
+
+def test_broken_rule_vs_missing_evidence():  # Task 7 fix
+    v = section(text(), "## Verdict and score")
+    assert "shows the rule wasn't followed" in v and "simply absent" in v

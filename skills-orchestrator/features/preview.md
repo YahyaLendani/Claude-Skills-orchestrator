@@ -28,6 +28,7 @@ Agent 2 → write a 1-page manager report (waits for Agent 1)
   skills: docs
 🆕 Draft skill: none
 ⚖️ Conflicts: none
+🧩 Fit: ok
 🔍 Checker: on
 
 Rough size: 2 agents + checker · medium
@@ -36,7 +37,8 @@ Reply: yes / edit / cancel
 
 - **Mode:** the mode line from flow step 2.
 - **Based on:** from memory (`features/memory.md`), or `no earlier recipe`.
-- **Agent lines:** one per agent: what it does, its skills, and `(waits for Agent N)` when it needs another agent's output.
+- **Agent lines:** one per agent: what it does, its skills, and `(waits for Agent N)` when it needs another agent's output. A trimmed skill shows the sections that agent gets, e.g. `skills: pdf (trimmed: Reading PDFs)` (`features/trimming.md`).
+- **🧩 Fit:** only when an agent waits for another: `🧩 Fit: ok`, or one line per gap asking to fix it (formats in `features/cards.md` "Fit check").
 - **🆕 Draft skill:** the name of any draft skill, or `none`.
 - **🆕 Suggested skill:** add this line only when a skill from outside is suggested:
   `🆕 Suggested skill: <name> (from <source>) — needs a separate yes to install`.

@@ -67,3 +67,8 @@ def test_preview_round_a_lines():
     block = re.search(r"```\n(📋 Orchestration plan.*?)```", text(), re.S).group(1)
     assert "🔍 Checker: on" in block and "+ checker" in block
     assert "⚠️ Weak skill:" in text() and "features/reliability.md" in text()
+
+
+def test_preview_round_b_lines():
+    t = text()
+    assert "🧩 Fit:" in t and "(trimmed:" in t and "features/cards.md" in t

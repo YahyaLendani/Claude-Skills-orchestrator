@@ -204,3 +204,57 @@ Prompt: "I just updated my pdf skill. Reset score for pdf."
 Expected:
 - pdf's counts become 0/0/0 and `last_problem` is cleared, in both files.
 - Confirms in one line; no orchestration flow (no mode line, no preview).
+
+## 25. First card
+Setup: Inside a git repo of a web app. The `pdf` skill is installed in the user folder at `~/.claude/skills/pdf/SKILL.md` (120 lines, headings `## Reading PDFs`, `## Making PDFs`). No cards exist yet.
+Prompt: "Pull the totals out of the 4 supplier PDFs in /invoices and write a short memo, split it so it's fast."
+Expected:
+- Writes a card for pdf (and docs) before planning, at `~/.claude/skills-orchestrator/cards/pdf.md`.
+- The card has `skill`, `fingerprint`, `made`, `lines`, `needs`, `produces`, `parts` (Reading PDFs, Making PDFs), `key_rules`.
+
+## 26. Card refresh
+Setup: Inside a git repo. `~/.claude/skills-orchestrator/cards/pdf.md` exists with `fingerprint: 3f9a1c0b7d2e`. Case A: the pdf skill's current SHA-256 starts with `3f9a1c0b7d2e`. Case B: it starts with `77b0e4d1c9aa` (the skill was edited).
+Prompt: "Extract the tables from the 3 PDFs in /reports and write a summary memo, split it so it's fast."
+Expected:
+- Case A: reuses the card, no rebuild.
+- Case B: reads the skill again and writes a new card with the new fingerprint.
+
+## 27. Fit warning
+Setup: Inside a git repo. Installed skills include `quick-fix` (card: needs ["a bug description"], produces ["a code change"]) and `incident-report` (card: needs ["root cause", "test results"], produces ["an incident report"]). The plan is Agent 1 → fix with `quick-fix`, Agent 2 → report with `incident-report` (waits for Agent 1).
+Prompt: "Patch the checkout crash with quick-fix and write an incident report with incident-report."
+Expected:
+- Preview shows a `🧩 Fit:` warning that Agent 2 needs test results (and root cause) that Agent 1's skills don't produce, and asks whether to add that to Agent 1's task.
+
+## 28. Big skill trimmed
+Setup: No git repo; a folder with 6 scanned PDF contracts. The `pdf` skill is 400 lines with headings `## Reading PDFs`, `## Filling forms`, `## Merging`, `## OCR`; its card exists and is current, with `key_rules: ["run OCR on scanned pages", "never overwrite the original PDF"]`.
+Prompt: "Read the 6 scanned contracts and pull out each one's end date and notice period into a table, split it so it's fast."
+Expected:
+- Agents get a trimmed copy of pdf with only `Reading PDFs` and `OCR` (plus the note, opening text and `## Key rules`), one copy per agent, under `jobs/<id>/trimmed/`.
+- Preview agent lines show `(trimmed: Reading PDFs, OCR)`.
+- The original skill is not changed.
+
+## 29. Small skill whole
+Setup: No git repo. A 90-line `memo-style` skill is installed, with a current card.
+Prompt: "Summarise these 3 meeting transcripts into one memo each, in our memo style, split it so it's fast."
+Expected:
+- memo-style is given whole to each agent (under 150 lines); no `(trimmed: …)` marker.
+
+## 30. Board finding
+Setup: Inside a git repo. Plan: Agent 1 fixes the login bug (debugging + TDD), Agent 2 updates the user guide's "Signing in" page (docs) in parallel. While working, Agent 1 finds that sessions now expire after 30 minutes instead of 24 hours, which changes what the guide must say.
+Prompt: "Fix the random logouts and update the 'Signing in' page of the user guide at the same time."
+Expected:
+- A board is created for the job; Agent 1 posts a `finding` line about the 30-minute expiry.
+- Agent 2 reads it between steps and reflects it in the guide.
+- The memory note includes that finding; the job folder is deleted at the end.
+
+## 31. Board blocker
+Setup: Inside a git repo. Two parallel agents: Agent 1 updates the API, Agent 2 updates the mobile app. Agent 2 posts `[Agent 2] blocker: need the new API field name before I can finish the login screen` and Agent 1 never answers it.
+Prompt: "Add a 'remember me' option to the API and the mobile app."
+Expected:
+- The combined answer shows the open blocker to the user.
+
+## 32. Checker uses card
+Setup: Inside a git repo. `test-driven-development` has a current card with `key_rules: ["write the failing test first", "see it fail before the fix"]`. Plan: Agent 1 fixes a bug with TDD, Agent 2 writes release notes. Agent 1's handback shows the test only passing (no failing run).
+Prompt: "Fix the price rounding bug and write release notes for it."
+Expected:
+- The checker uses the card's key rules and reports for Agent 1 that the test was not seen failing before the fix (test-driven-development rule).
