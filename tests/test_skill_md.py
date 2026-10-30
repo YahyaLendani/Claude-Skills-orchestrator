@@ -4,7 +4,8 @@ from helpers import SKILL_DIR, body, frontmatter, read_skill_file, section
 
 SUPPORT_FILES = ["modes/coding.md", "modes/documents.md", "features/memory.md",
                  "features/conflicts.md", "features/new-skills.md", "features/preview.md",
-                 "features/reliability.md", "features/checker.md"]
+                 "features/reliability.md", "features/checker.md",
+                 "features/cards.md", "features/trimming.md", "features/board.md"]
 
 
 def text():
@@ -107,3 +108,9 @@ def test_evidence_for_skill_rules():  # Final I4
 
 def test_reset_reachable():  # Final I8
     assert "reset score for" in frontmatter("SKILL.md")["description"]
+
+
+def test_round_b_flow():
+    flow = section(text(), "## Flow")
+    for s in ["card", "fit check", "trimmed", "board", "job folder"]:
+        assert s in flow, s

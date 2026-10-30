@@ -25,7 +25,7 @@ Give it only these — not the full chat, and never passwords or keys.
 For each agent, check:
 
 1. **Task done** — every part of what that agent was asked to do.
-2. **Skill rules followed** — the key rules of the skills it used. Examples: test-driven-development — a test was written and seen failing before the fix; docs — the requested format and sections are there.
+2. **Skill rules followed** — the key rules of the skills it used: each skill's `key_rules` from its card (`features/cards.md`), or the skill itself when it has no card. Examples: test-driven-development — a test was written and seen failing before the fix; docs — the requested format and sections are there.
 3. **Claims backed by evidence** — "all tests pass" needs test output; "file created" needs the file to exist; "fixed" needs the change.
 
 Don't redo the work, and don't judge style beyond what the skills require.
