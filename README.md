@@ -17,9 +17,11 @@ split across agents:
 1. **Picks the mode** (coding, documents, or both) from clues in the request
    and the folder you're in, and tells you in one line:
    `Mode: coding + documents`.
-2. **Checks memory** for a recipe that worked on a similar task before.
+2. **Checks memory** for a recipe that worked on a similar task before, and
+   each skill's **reliability score** (how often it worked).
 3. **Picks the skills** for each part of the task from what you have installed.
-   If nothing fits a part, it suggests an existing skill or **drafts a new
+   A skill that keeps failing is flagged with a suggested replacement. If
+   nothing fits a part, it suggests an existing skill or **drafts a new
    one** for that task.
 4. **Settles conflicts** when two skills disagree, using clear priority rules,
    and shows you the decision.
@@ -34,16 +36,30 @@ split across agents:
    Agent 1 → fix the login bug
      skills: systematic-debugging, test-driven-development
    Agent 2 → write a 1-page manager report (waits for Agent 1)
-     skills: docs
+     skills: old-report-skill
+   ⚠️ Weak skill: old-report-skill worked 1 of 4 times. Use docs instead? (yes / no)
    🆕 Draft skill: none
    ⚖️ Conflicts: none
+   🔍 Checker: on
 
-   Rough size: 2 agents · medium
+   Rough size: 2 agents + checker · medium
    Reply: yes / edit / cancel
    ```
 
-6. **Runs the agents**, combines their results, and **saves what worked** to
-   memory.
+6. **Runs the agents**, then on big jobs a fresh **checker** agent reviews
+   each agent's work (task done, skill rules followed, claims backed by
+   evidence) and offers one fix round if it finds problems:
+
+   ```
+   🔍 Checker report
+   Agent 1 (fix the login bug): ✅ pass
+   Agent 2 (manager report): ⚠️ 1 problem
+     - missing "Impact" section (docs skill: required sections)
+   Send Agent 2 back to fix these once? (yes / no)
+   ```
+
+7. **Combines the results** and **saves what worked** to memory, and each
+   skill's result to its reliability score.
 
 For simple one-skill tasks it stays out of the way.
 
@@ -117,21 +133,31 @@ slowed down.
 instructions only, with no scripts. Memory stores short summaries, never file
 contents, passwords or keys.
 
+**Scores live in their own file, `scores.md`.** It sits next to
+`memory.md`, in the same two places and with the same rules. It's separate
+because memory drops old recipes (5 per task type), but a skill's track
+record shouldn't shrink when old recipes are dropped. When the two
+`scores.md` files disagree, the one with more uses wins; they're never added
+together, so jobs aren't counted twice.
+
+**The checker runs only on big jobs, and fixes only with your yes.** It's a
+fresh agent that did none of the work. When it finds problems it reports them
+and offers one fix round; nothing is redone without your yes. A weak skill is
+flagged, never swapped silently.
+
 ## Testing
 
 - **Structure checks:** `python3 -m pytest` checks that every file exists
   and contains the agreed rules (paths, reply options, rule order, and so on).
   Needs `pytest` and `pyyaml`.
-- **Behavior checks:** `tests/scenarios.md` lists 16 scenarios (the last 6 cover the safety rules). Each one is
-  run on a fresh agent without the skill (`tests/results/baseline.md`) and
-  with it (`tests/results/with-skill.md`) to show that the skill changes
+- **Behavior checks:** `tests/scenarios.md` lists 24 scenarios (11–16 cover the safety rules, 17–24 the reliability score and checker). Each one is
+  run on a fresh agent without the feature (`tests/results/baseline.md`,
+  `tests/results/round-a-baseline.md`) and with it (`tests/results/with-skill.md`) to show that the skill changes
   behavior.
 
 ## Coming later
 
-- **Reliability score** for each skill: how often it helped or caused problems.
 - **Cutting big skills down** to only the part each agent needs.
 - **Skill cards:** each skill declares what it needs and what it produces, so skills can be chained safely.
 - **Shared board:** agents post findings while working, so others can react right away.
-- **Checker agent:** reviews each agent's work against its skills' rules before handing it back.
 - **Startup hook and `/orchestrate` command:** turning the skill into a full plugin, so it's active in every session.
