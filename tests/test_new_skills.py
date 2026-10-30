@@ -32,3 +32,19 @@ def test_save_or_delete():
     assert "delete the draft" in t.lower()
     assert "~/.claude/skills/" in t
     assert ".claude/skills/" in t
+
+
+def test_declining_save_is_not_a_failure():
+    t = text()
+    assert "or the user says no" not in t
+    assert "no extra memory entry" in t
+
+
+def test_suggested_skill_needs_separate_yes():
+    assert "separate yes" in text()
+
+
+def test_save_checks_existing_folder():
+    t = text()
+    assert "already exists" in t
+    assert "Save `<name>` as a permanent skill in `~/.claude/skills/` and `.claude/skills/`?" in t

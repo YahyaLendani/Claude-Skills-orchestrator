@@ -8,10 +8,12 @@ fits it well.
 1. If a skill-search or plugin-search tool is available, search with a few
    words that describe the subtask.
 2. If a good match is found, **suggest** it in the preview with its name and
-   where it comes from, e.g.
-   `🆕 Suggested skill: invoice-tools (from the org skill catalog) — install? (yes / no)`.
-3. Never install a skill without the user's yes. If they say no, draft one
-   instead (below) or do that part without a skill.
+   where it comes from (format in `features/preview.md`), e.g.
+   `🆕 Suggested skill: invoice-tools (from the org skill catalog) — needs a separate yes to install`.
+3. Never install a skill without the user's own yes to installing it. A yes to
+   the plan is not enough: after the plan is approved, ask a separate yes /
+   no question, "Install `<name>` from <source>? (yes / no)", and wait for it.
+   If they say no, draft one instead (below) or do that part without a skill.
 
 If no search tool is available, or nothing fits, go to "Draft a skill".
 
@@ -28,13 +30,18 @@ If no search tool is available, or nothing fits, go to "Draft a skill".
 
 ## After the job
 
-- **It worked:** ask once: "Save `<name>` as a permanent skill?"
+- **It worked:** ask once: "Save `<name>` as a permanent skill in `~/.claude/skills/` and `.claude/skills/`?"
+  (The second one is inside the project, so it can be committed and shared with teammates.)
+  Before copying, check each place: if a skill folder with that name already exists, don't replace it — ask the user for a different name or skip that place.
   On yes, copy the folder to both places, the same rule as memory:
   - `~/.claude/skills/<name>/` (user folder, when available and writable), and
   - `.claude/skills/<name>/` (project).
   Then delete the draft folder.
-- **It didn't work, or the user says no:** delete the draft folder and add a
-  memory entry with `result: failed` (or `partly`) and a `note` on what went wrong.
+- **The user says no to saving:** delete the draft folder. Write no extra memory entry —
+  the job's one memory entry (flow step 9) already records how it went.
+- **It didn't work:** delete the draft folder. In the job's memory entry
+  (flow step 9), set `result: failed` (or `partly`) and use `note` to say what
+  went wrong with the draft.
 
 ## Safety
 

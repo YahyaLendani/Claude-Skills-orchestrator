@@ -1,7 +1,7 @@
 import re
 
 import yaml
-from helpers import read_skill_file
+from helpers import read_skill_file, section
 
 PATH = "features/memory.md"
 HEADINGS = ["## Entry format", "## Judging the result", "## Using memory",
@@ -46,8 +46,14 @@ def test_limits():
 
 
 def test_unreadable_file_kept():
-    assert "memory.bak.md" in text()
     assert "never overwrite" in text()
+    # Dated backup name, so an earlier backup is never replaced.
+    assert "memory.bak-<YYYY-MM-DD>.md" in text()
+    assert "never replace an existing backup" in text()
+
+
+def test_unreadable_file_moved_only_when_saving():
+    assert "only when you are about to save" in text()
 
 
 def test_duplicates_counted_once():
@@ -70,4 +76,18 @@ def test_skippable_question():
 
 def test_no_git_notice_has_own_wording():
     # With no git repo the file is not committed, so the notice must not say so.
-    assert "If there is no git repository, say instead:" in text()
+    assert "No git repository: \"I'm saving what worked to `.claude/skills-orchestrator/memory.md` in this folder.\"" in text()
+
+
+def test_file_layout_defined():
+    layout = section(text(), "## File layout")
+    assert "```yaml" in layout or "~~~" in layout
+    assert "Extra text outside the list is fine" in layout
+
+
+def test_notice_does_not_promise_commit():
+    t = text()
+    assert "It will be committed with the project" not in t
+    assert "not committed yet" in t
+    assert "offer to include it" in t
+    assert ".gitignore" in t

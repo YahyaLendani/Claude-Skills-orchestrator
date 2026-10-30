@@ -47,3 +47,9 @@ def test_size_words_do_not_overlap():
     assert "`small` — 2 agents with short tasks" in t
     assert "`medium` — 3 agents, or 2 agents with longer tasks" in t
     assert "`large` — 4 or more agents" in t
+
+
+def test_plan_yes_is_not_install_consent():
+    t = text()
+    assert "🆕 Suggested skill:" in t
+    assert "separate yes" in t

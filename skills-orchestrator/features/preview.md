@@ -36,7 +36,11 @@ Reply: yes / edit / cancel
 - **Mode:** the mode line from flow step 2.
 - **Based on:** from memory (`features/memory.md`), or `no earlier recipe`.
 - **Agent lines:** one per agent: what it does, its skills, and `(waits for Agent N)` when it needs another agent's output.
-- **🆕 Draft skill:** the name of any draft or suggested skill, or `none`.
+- **🆕 Draft skill:** the name of any draft skill, or `none`.
+- **🆕 Suggested skill:** add this line only when a skill from outside is suggested:
+  `🆕 Suggested skill: <name> (from <source>) — needs a separate yes to install`.
+  A `yes` to the plan does not install it; ask the install question from
+  `features/new-skills.md` next.
 - **⚖️ Conflicts:** one line per conflict (format in `features/conflicts.md`), or `none`.
 - **Rough size:** the agent count plus one word:
   - `small` — 2 agents with short tasks;

@@ -59,16 +59,16 @@ git clone https://github.com/YahyaLendani/Skills-orchestrator.git
 ```
 
 ```bash
-mkdir -p ~/.claude/skills && cp -r Skills-orchestrator/skills-orchestrator ~/.claude/skills/skills-orchestrator
+mkdir -p ~/.claude/skills && rm -rf ~/.claude/skills/skills-orchestrator && cp -r Skills-orchestrator/skills-orchestrator ~/.claude/skills/skills-orchestrator
 ```
 
 **For one project only** (run inside that project):
 
 ```bash
-mkdir -p .claude/skills && cp -r /path/to/Skills-orchestrator/skills-orchestrator .claude/skills/skills-orchestrator
+mkdir -p .claude/skills && rm -rf .claude/skills/skills-orchestrator && cp -r /path/to/Skills-orchestrator/skills-orchestrator .claude/skills/skills-orchestrator
 ```
 
-Start a new Claude Code session afterwards so the skill is picked up.
+The `rm -rf` removes an older copy first, so updating works the same way as installing. Start a new Claude Code session afterwards so the skill is picked up.
 
 ## How it compares
 
@@ -95,7 +95,7 @@ can grow into a full plugin later.
 **Memory is stored in both the user folder and the project.**
 
 - `~/.claude/skills-orchestrator/memory.md` (user folder): lessons carry across projects on your computer. What it learns in one project helps in the next.
-- `.claude/skills-orchestrator/memory.md` (project): saved with the project in git, so memory survives **cloud sessions**. Claude Code cloud sessions run in a temporary container that is deleted when the session ends, so anything kept only in the user folder would be lost there. A project copy can also be shared with teammates.
+- `.claude/skills-orchestrator/memory.md` (project): kept with the project, so memory survives **cloud sessions** once it's committed. Claude Code cloud sessions run in a temporary container that is deleted when the session ends, so anything kept only in the user folder, or left uncommitted, would be lost there. The skill never commits it on its own: it tells you when the file has uncommitted changes and offers to include it in your next commit. A project copy can also be shared with teammates.
 
 Using both gets the benefits of each. When both exist, project entries are
 read first, and the same entry is counted once. If the user folder can't be

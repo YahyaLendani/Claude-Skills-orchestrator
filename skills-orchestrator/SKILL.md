@@ -45,6 +45,8 @@ worked. Works in two modes, chosen automatically: **coding** and
    - the names of its skills, plus only the skill files it needs (no full chat history);
    - what to hand back.
 
+   Never copy a password, token or API key into anything an agent writes (documents, notes, code, commits). Give it only to the agent that needs it, to use while it runs.
+
    Give a part its own agent only when it can run in parallel with others, needs a different mode, or is big enough to benefit from a fresh agent. Short steps that run one after another in the same mode stay with one agent (e.g. find the bug → fix it → test it).
 
    Agents that don't depend on each other run in parallel. An agent that needs another agent's output runs after it and receives that output (e.g. the report agent gets the bug fix and test results).

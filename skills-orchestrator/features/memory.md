@@ -24,6 +24,25 @@ One entry per big job (a job that showed the preview). Append it to the list.
 - `result` — one of `worked`, `partly`, `failed`.
 - `note` — one line: what to do differently next time, or what made it work.
 
+## File layout
+
+Each memory file looks like this: a heading, then one `yaml` block holding the
+list of entries. Add new entries to the end of that list.
+
+~~~markdown
+# Skills Orchestrator memory
+
+```yaml
+- task: "..."
+  type: [...]
+  ...
+```
+~~~
+
+Extra text outside the list is fine (the user may add notes); keep it as it
+is. A file only counts as unreadable when its `yaml` block can't be read as a
+list of entries.
+
 ## Judging the result
 
 Decide `result` from the signs:
@@ -76,8 +95,11 @@ goes under the current working folder:
 ## Problems
 
 - **Memory file missing:** continue without memory. Create the file when saving the first entry.
-- **First time the project file is created:** tell the user in one line: "I'm saving what worked to `.claude/skills-orchestrator/memory.md`. It will be committed with the project; add it to `.gitignore` if you'd rather git-ignore it."
-  If there is no git repository, say instead: "I'm saving what worked to `.claude/skills-orchestrator/memory.md` in this folder."
-- **Memory file unreadable** (broken format, hand-edited): never overwrite it. Rename it to `memory.bak.md` in the same folder, start a new `memory.md`, and tell the user in one line that the old file was kept as `memory.bak.md`.
+- **First time the project file is created:** check whether `.gitignore` excludes it, then tell the user in one line:
+  - Not git-ignored: "I'm saving what worked to `.claude/skills-orchestrator/memory.md`. It's not committed yet — want me to include it in the next commit? (Add it to `.gitignore` if you'd rather not keep it in git.)" Do not commit it on your own; offer to include it when you or the user next commit.
+  - Git-ignored: "I'm saving what worked to `.claude/skills-orchestrator/memory.md`. It's git-ignored, so it stays on this machine only."
+  - No git repository: "I'm saving what worked to `.claude/skills-orchestrator/memory.md` in this folder."
+- **Cloud sessions:** a temporary cloud container is deleted when the session ends, so project memory only survives once it's committed. If the project file has changes that are not committed yet when you finish a job, say so in one line and offer to include it in the commit.
+- **Memory file unreadable** (see "File layout"): never overwrite it. When reading, just continue without it. Rename it only when you are about to save: rename it to `memory.bak-<YYYY-MM-DD>.md` in the same folder (add `-2`, `-3`… if that name is taken; never replace an existing backup), start a new `memory.md`, and tell the user in one line where the old file was kept.
 - **Same entry in both files:** when merging, entries with the same task and date count once.
 - **Secrets in the request:** if the user's message contains a password, token or API key, leave out the secret when writing `task` and `note`. Describe it in general words ("used the user's API key"), never the value.

@@ -70,3 +70,7 @@ def test_when_to_split():
 
 def test_unclear_task_asks_one_question():
     assert "one focused question" in section(text(), "## Flow")
+
+
+def test_secrets_stay_out_of_agent_outputs():
+    assert "Never copy a password, token or API key" in section(text(), "## Flow")

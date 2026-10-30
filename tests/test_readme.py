@@ -36,3 +36,11 @@ def test_coming_later():
     later = section(text(), "## Coming later").lower()
     for s in ["reliability score", "skill cards", "shared board", "checker agent", "startup hook"]:
         assert s in later, s
+
+
+def test_reinstall_replaces_old_folder():
+    assert "rm -rf ~/.claude/skills/skills-orchestrator" in text()
+
+
+def test_cloud_memory_needs_commit():
+    assert "once it's committed" in section(text(), "## Design decisions")
