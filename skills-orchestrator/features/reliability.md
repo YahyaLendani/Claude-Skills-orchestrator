@@ -23,7 +23,8 @@ outside the list is fine; keep it as it is.
 
 ## Counting
 
-- Each time an agent uses a skill, that skill gets +1 under the agent's result: `worked`, `partly` or `failed`. Update `last_used`, and `last_problem` when the result wasn't `worked`.
+- Each skill used in a job gets +1 under its result: `worked`, `partly` or `failed`. Count it once per job, even when several agents used it (e.g. three parallel pdf agents); if their results differ, count the worst one (`failed` over `partly` over `worked`).
+- Update `last_used`. Set `last_problem` when the result wasn't `worked`; when it was `worked`, keep `last_problem` as it is (it records the last time something went wrong).
 - **Big jobs:** the result comes from the checker's verdict (see `features/checker.md`, "Verdict and score").
 - **Other orchestrated jobs** (mode line shown, no preview): the result comes from the signs — tests passed, the user accepted it, the user asked for fixes — the same signs as `features/memory.md` "Judging the result".
 - **The user's verdict wins:** if the user disagrees with a result ("that's fine, actually"), count the user's verdict instead.
@@ -45,6 +46,17 @@ own), cloud sessions, and the home folder. See `features/memory.md`
 with more total uses (`worked + partly + failed`), and never add the two
 lines together — that would count the same jobs twice.
 
+**Writing both files:** start from the line you read (the one with more
+uses), add this job's result, and write that same line to both files. That
+way the two files agree again after each job.
+
+**First-time notice:** when memory.md and scores.md are both new, mention
+both in one line, e.g. "I'm saving what worked and skill scores to
+`.claude/skills-orchestrator/` (memory.md and scores.md). They're not
+committed yet — want me to include them in the next commit?" When only
+scores.md is new, use the memory wording from `features/memory.md` with
+"skill scores" and `scores.md` in place of memory.
+
 ## Weak skills
 
 A skill is weak when it has been used at least 3 times and worked less than half
@@ -61,6 +73,7 @@ When a chosen skill is weak, add this line to the preview:
 - **yes:** use the replacement for that part.
 - **no:** keep the skill, and don't ask about it again in this session.
 - Never swap a skill without the user's yes — even when it is weak.
+- Show the line even when the user's instructions named it (e.g. their CLAUDE.md asks for that skill): they may not know its record. Their answer decides; if they say no, their instruction stands.
 
 **Ties:** when two installed skills fit a part equally well, pick the one
 with the higher score (more `worked` out of total uses). A skill with fewer

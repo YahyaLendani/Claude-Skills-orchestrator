@@ -77,3 +77,24 @@ def test_missing_counts_are_zero():  # Review Focus 3
 def test_no_secrets():
     for s in ["passwords", "keys", "file contents"]:
         assert s in text(), s
+
+
+def test_once_per_job_worst_result():  # Task 6 fix: parallel agents inflated counts
+    c = section(text(), "## Counting")
+    assert "once per job" in c and "worst" in c
+
+
+def test_write_same_line_to_both():  # Task 6 fix: files drifted apart
+    assert "write that same line to both files" in section(text(), "## Where it lives")
+
+
+def test_weak_flag_even_when_user_named_it():  # Task 6 fix
+    assert "even when the user's instructions named it" in section(text(), "## Weak skills")
+
+
+def test_last_problem_kept_on_worked():  # Task 6 fix
+    assert "keep `last_problem`" in section(text(), "## Counting")
+
+
+def test_one_notice_for_both_files():  # Task 6 fix
+    assert "memory.md and scores.md" in section(text(), "## Where it lives")
