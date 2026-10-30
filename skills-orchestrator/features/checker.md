@@ -8,6 +8,7 @@ reliability score (`features/reliability.md`).
 
 - Run it on big jobs only (jobs that showed the preview), after all agents finish and before combining.
 - The checker is a fresh agent that did none of the work — never one of the agents being checked.
+- With the plugin installed, run the `skills-orchestrator:checker` agent (`agents/checker.md` in the repository). With a copy install, use a fresh general-purpose agent given the same instructions. The rules below apply either way.
 - The preview shows `🔍 Checker: on`. The user can turn it off for one job with `edit` (e.g. "no checker"); the preview then shows `🔍 Checker: off`, no checker runs, and scores come from the signs, as on small jobs.
 
 ## Inputs
@@ -32,7 +33,8 @@ Don't redo the work, and don't judge style beyond what the skills require.
 
 ## Report
 
-Show it to the user before the combined results:
+Show it to the user before the combined results. The format is the one in
+`agents/checker.md`; keep it exact:
 
 ```
 🔍 Checker report
