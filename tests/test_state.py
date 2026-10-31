@@ -20,6 +20,8 @@ ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "scripts" / "orchestrator_state.py"
 JOB_RE = re.compile(r"^\d{8}-\d{6}-[0-9a-f]{8}$")
 
+pytestmark = pytest.mark.execution
+
 
 def load_module():
     assert SCRIPT.is_file(), "scripts/orchestrator_state.py is missing"
