@@ -16,7 +16,7 @@ reliability score (`features/reliability.md`).
 For each agent being checked, give the checker:
 
 - the task that agent was given;
-- the skill files it used (their rules);
+- the original skill files it used (or their paths), and the card's `key_rules` as a map only;
 - what it handed back, including its evidence (test output, changed file paths, created files).
 
 Give it only these — not the full chat, and never passwords or keys.
@@ -26,7 +26,7 @@ Give it only these — not the full chat, and never passwords or keys.
 For each agent, check:
 
 1. **Task done** — every part of what that agent was asked to do.
-2. **Skill rules followed** — the key rules of the skills it used: each skill's `key_rules` from its card (`features/cards.md`), or the skill itself when it has no card. Examples: test-driven-development — a test was written and seen failing before the fix; docs — the requested format and sections are there.
+2. **Skill rules followed** — read the original skill, not only its card: its mandatory rules and verification steps, with `key_rules` from the card (`features/cards.md`) as a quick index. A rule the card left out still counts. Examples: test-driven-development — a test was written and seen failing before the fix; docs — the requested format and sections are there.
 3. **Claims backed by evidence** — "all tests pass" needs test output; "file created" needs the file to exist; "fixed" needs the change.
 
 Don't redo the work, and don't judge style beyond what the skills require.

@@ -272,6 +272,36 @@ def test_project_root_falls_back_to_the_start_folder(state, tmp_path):
     assert module.find_project(plain) == plain.resolve()
 
 
+def test_fingerprint_covers_referenced_files(state, tmp_path):
+    module, _, _ = state
+    skill = tmp_path / "skill"
+    (skill / "references").mkdir(parents=True)
+    (skill / "SKILL.md").write_text("# Skill\n\n## A\n\nrule\n", encoding="utf-8")
+    ref = skill / "references" / "more.md"
+    ref.write_text("v1\n", encoding="utf-8")
+
+    first = module.fingerprint(skill)
+    assert module.fingerprint(skill) == first
+    assert first["files"] == 2
+
+    ref.write_text("v2\n", encoding="utf-8")
+    assert module.fingerprint(skill)["fingerprint"] != first["fingerprint"]
+
+
+def test_fingerprint_ignores_caches_and_counts_lines(state, tmp_path):
+    module, _, _ = state
+    skill = tmp_path / "skill"
+    (skill / "__pycache__").mkdir(parents=True)
+    (skill / "__pycache__" / "x.pyc").write_bytes(b"cache")
+    (skill / ".git").mkdir()
+    (skill / ".git" / "config").write_text("git\n", encoding="utf-8")
+    (skill / "SKILL.md").write_text("# Skill\n\n## A\n\nrule\n", encoding="utf-8")
+
+    result = module.fingerprint(skill)
+    assert result["files"] == 1
+    assert result["lines"] == 5
+
+
 def test_validate_reports_bad_job_files(state):
     module, project, _ = state
     job = module.new_job(project, task="valid")

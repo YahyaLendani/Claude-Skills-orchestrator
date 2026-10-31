@@ -1,6 +1,6 @@
 # Behavior-run harness
 
-`tests/scenarios.md` describes 43 behavior scenarios. Scenarios 1–32 have
+`tests/scenarios.md` describes 46 behavior scenarios. Scenarios 1–32 have
 recorded before/after runs in `tests/results/`. This folder holds what is needed
 to record 33–40 the same way, with real Claude Code sessions rather than a
 description of what the skill would do.
@@ -8,6 +8,8 @@ description of what the skill would do.
 Scenarios 41–43 (two sessions at once, an interrupted job, and the utility
 missing) need two simultaneous sessions or a copy install, so they are not in
 this harness yet. Their code-level parts are covered by `tests/test_state.py`.
+Scenarios 44–46 (unmarked big skill, referenced file changes, checker reading
+the original) need a seeded skill folder and are not in the harness yet.
 
 ## Status
 

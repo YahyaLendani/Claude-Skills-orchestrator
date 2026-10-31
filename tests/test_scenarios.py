@@ -49,3 +49,11 @@ def test_round_d_scenarios():
     names = " ".join(t for _, t in titles)
     for s in ["Two sessions at once", "Interrupted job", "State utility missing"]:
         assert s in names, s
+
+
+def test_round_e_scenarios():
+    titles = scenario_titles()
+    assert len(titles) >= 46
+    names = " ".join(t for _, t in titles)
+    for s in ["Unmarked big skill", "Referenced file changes", "Checker reads the original"]:
+        assert s in names, s

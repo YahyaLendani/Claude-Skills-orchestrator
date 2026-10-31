@@ -174,7 +174,7 @@ def test_checker_feature_points_at_agent():
 
 def test_readme_install_has_both_paths():
     readme = read(ROOT / "README.md")
-    assert "/plugin marketplace add YahyaLendani/Skills-orchestrator" in readme
+    assert "/plugin marketplace add YahyaLendani/Claude-Skills-orchestrator" in readme
     assert "/plugin install skills-orchestrator@skills-orchestrator" in readme
     assert "cp -r" in readme
 

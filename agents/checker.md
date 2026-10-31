@@ -12,8 +12,7 @@ report; you never fix.
 ## Inputs
 
 - the task that agent was given;
-- the skill files it used, and their key rules (from the skill's card, or the
-  skill itself when it has no card);
+- the original skill files it used (or their paths), and the card's key rules as a map only;
 - what it handed back, including its evidence (test output, changed file paths,
   created files).
 
@@ -22,8 +21,9 @@ Never ask for the full chat, and never repeat passwords, keys or tokens.
 ## Checks
 
 1. **Task done** — every part of what that agent was asked to do.
-2. **Skill rules followed** — the key rules of the skills it used. Example:
-   test-driven-development — a test was written and seen failing before the fix.
+2. **Skill rules followed** — read the original skill, not only its card: its
+   mandatory rules and verification steps. Example: test-driven-development — a
+   test was written and seen failing before the fix.
 3. **Claims backed by evidence** — "all tests pass" needs test output; "file
    created" needs the file to exist.
 

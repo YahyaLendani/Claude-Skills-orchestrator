@@ -89,6 +89,13 @@ def test_blame_only_the_broken_rule():  # Final I5
 def test_checker_uses_card_rules():
     c = section(text(), "## Checks")
     assert "key_rules" in c and "features/cards.md" in c
+    assert "read the original skill" in c
+
+
+def test_checker_inputs_include_original_skill():
+    i = section(text(), "## Inputs")
+    assert "original skill files" in i
+    assert "map only" in i
 
 
 def test_broken_rule_vs_missing_evidence():  # Task 7 fix

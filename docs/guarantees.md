@@ -17,6 +17,7 @@ These hold even when two sessions run in the same project at the same time.
 | Results are append-only | One file per job, never rewritten; existing skills are rejected | `result append` |
 | No lost score updates | `scores.md` is rebuilt from the baseline + all result records | `scores sync` |
 | No lost memory entries | Read-modify-write under a lock, then atomic replace | `memory add` |
+| Skill fingerprints | One SHA-256 over every file in the skill folder, ignoring caches | `fingerprint` |
 | No half-written files | Temp file in the target folder, `os.replace`, fsync | all writes |
 | Stale locks recover | A lock older than 60 seconds is removed | all writes |
 

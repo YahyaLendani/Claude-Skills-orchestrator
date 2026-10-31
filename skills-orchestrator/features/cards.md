@@ -25,7 +25,7 @@ key_rules:
   - "run OCR on scanned pages"
 ```
 
-- `fingerprint` — the first 12 characters of the SHA-256 of the skill's `SKILL.md` (e.g. from `sha256sum SKILL.md`). If that can't be computed, use the file's size in bytes and last-modified date instead, e.g. `"8421-2026-10-28"`.
+- `fingerprint` — the first 12 characters of one SHA-256 over **every file in the skill folder**: each file's relative path plus its own SHA-256, so a change to a referenced file refreshes the card too. Compute it with `python "${CLAUDE_PLUGIN_ROOT}/scripts/orchestrator_state.py" fingerprint <skill-folder>`. If that can't be computed, use the folder's file count, total size in bytes and newest modified date instead, e.g. `"7-8421-2026-10-28"`.
 - `lines` — the line count of `SKILL.md`.
 - `needs` / `produces` — 1–4 short phrases each.
 - `parts` — one entry per top-level section (`## ` heading) of `SKILL.md`. `section` is the exact heading text, without the `## `. A skill with no `## ` headings gets `parts: []`.
