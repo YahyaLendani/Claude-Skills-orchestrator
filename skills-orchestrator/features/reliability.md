@@ -31,10 +31,37 @@ outside the list is fine; keep it as it is.
 - Draft skills are not scored until they are saved as permanent skills.
 - One score per skill, across all task types.
 
+## Per-job results
+
+Each orchestrated job writes one result record, and the score files are rebuilt
+from those records. This is what keeps two sessions from overwriting each
+other's counts.
+
+- At flow step 9, record every skill used in the job, once per job:
+  `python "${CLAUDE_PLUGIN_ROOT}/scripts/orchestrator_state.py" result append --id <job> --skill pdf:worked --skill docs:partly`
+  It writes `results/<job-id>.json` in the project and a copy under the user
+  folder. Records are append-only: one file per job, never edited.
+- Then rebuild both score files:
+  `python "${CLAUDE_PLUGIN_ROOT}/scripts/orchestrator_state.py" scores sync`
+  The first sync keeps the counts already in `scores.md` as a baseline; later
+  syncs add the result records. Running it twice changes nothing.
+- After the first sync, treat `scores.md` as a cache: it is rebuilt from the
+  baseline and the result records. Do not hand-edit it.
+- If the utility is not available (no Python), write the two files by hand as
+  described in "Where it lives". Do not mix the two ways in one project.
+
 ## Where it lives
 
 - **User folder:** `~/.claude/skills-orchestrator/scores.md`
 - **Project:** `.claude/skills-orchestrator/scores.md`
+
+Result records live next to them:
+
+- **Project:** `.claude/skills-orchestrator/results/<job-id>.json`
+- **User:** `~/.claude/skills-orchestrator/results/<project-key>/<job-id>.json`
+
+The first sync also writes `results/baseline-project.json` and
+`results/baseline-user.json` (the counts each file had before the first sync).
 
 The same rules as memory apply: where the project `.claude/` folder goes,
 writing to both files (or the project only when the user folder isn't
@@ -94,9 +121,14 @@ than 3 uses counts as neither weak nor strong.
 ## Reset
 
 When the user says "reset score for <name>" (e.g. after updating that
-skill), set its `worked`, `partly` and `failed` to zero and clear
-`last_problem` (`""`), and set `reset_on` to today, in both files (when the user folder isn't writable, the project file only — the `reset_on` rule in "Where it lives" carries it over later). Confirm in one line. This is not an
-orchestrated job: no mode line, no preview.
+skill), run
+`python "${CLAUDE_PLUGIN_ROOT}/scripts/orchestrator_state.py" scores reset --skill <name>`.
+It sets its `worked`, `partly` and `failed` to zero, clears `last_problem`
+(`""`), and sets `reset_on` to today, in both files (when the user folder isn't
+writable, the project file only — the `reset_on` rule in "Where it lives"
+carries it over later). Results recorded before that date are ignored from then
+on. Confirm in one line. Without the utility, do the same by hand. This is not
+an orchestrated job: no mode line, no preview.
 
 ## Problems
 

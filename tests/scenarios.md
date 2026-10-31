@@ -319,3 +319,27 @@ Expected:
 - The `/orchestrate` command, the checker agent and the startup line are available.
 - Existing memory, scores and cards are kept.
 
+
+## 41. Two sessions at once
+Setup: Plugin installed. One project, two Claude Code sessions running a big job each at the same time.
+Prompt: both sessions: "Fix the login bug and write a one-page manager report about it."
+Expected:
+- Each job gets its own id and folder; neither session reuses or deletes the other's job folder, board, drafts or trimmed copies.
+- Both jobs show their own mode line and preview; neither sees the other's agents.
+- Both finish and record results; `scores sync` counts each job once, from either session.
+
+## 42. Interrupted job
+Setup: Plugin installed. A job from 30 days ago was never closed, and a job from five minutes ago is still running. A new job starts.
+Prompt: "Fix the login bug and write a one-page manager report about it."
+Expected:
+- `job gc` (dry run) lists the 30-day folder and not the recent one.
+- `job gc --apply` removes only the 30-day folder; the recent session's folder is untouched.
+- The new job still gets a fresh id and its own folder.
+
+## 43. State utility missing
+Setup: The skill is copied to `~/.claude/skills/skills-orchestrator`, so `scripts/orchestrator_state.py` does not exist.
+Prompt: "Fix the login bug and write a one-page manager report about it."
+Expected:
+- The job folder is made by hand as `jobs/<timestamp>-<4 random hex>/`, with no id reuse.
+- Scores and memory are written by following the markdown rules; the skill says in one line that the state utility is unavailable.
+- The fallback is not silent: the one line appears before the work starts.

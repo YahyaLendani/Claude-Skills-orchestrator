@@ -42,7 +42,7 @@ worked. Works in two modes, chosen automatically: **coding** and
    - A part that is simple enough to do well without a skill (e.g. a small docs edit, a quick throwaway prototype) gets `skills: none`. Draft a skill only when the part needs special steps that no installed skill covers.
 5. **Settle conflicts** between the chosen skills with [conflicts](features/conflicts.md).
 6. **Show the preview** for big jobs, using [preview](features/preview.md). Wait for `yes` before any work starts.
-7. **Run.** Delete any leftover job folders, then make this job's folder if it needs a board or trimmed copies ([board](features/board.md)). Start one agent per part. Give each agent:
+7. **Run.** Collect leftover job folders older than 7 days (`job gc`, never another session's recent job), then create this job with `job new` — every orchestrated job gets an id, for its result record — and add a board or trimmed copies if it needs them ([board](features/board.md)). Start one agent per part. Give each agent:
    - its task, in a few clear sentences;
    - the names of its skills, plus only the skill files it needs (no full chat history) — for skills over 150 lines, a trimmed copy with only the sections its task needs ([trimming](features/trimming.md));
    - on jobs with 2 or more agents, the board rules from [board](features/board.md);
@@ -54,7 +54,7 @@ worked. Works in two modes, chosen automatically: **coding** and
 
    Agents that don't depend on each other run in parallel. An agent that needs another agent's output runs after it and receives that output (e.g. the report agent gets the bug fix and test results).
 8. **Check and combine.** On big jobs, run the checker first ([checker](features/checker.md)) — the `skills-orchestrator:checker` agent when the plugin is installed, otherwise a fresh general-purpose agent given the same instructions: show its report and, if it found problems, the one-fix offer. Read the board, if there is one. Then combine the agents' results into one answer for the user: what was done, by which agent, and anything that still needs their attention.
-9. **Save to memory.** For big jobs, and for any job that failed or partly worked, follow [memory](features/memory.md) "Entry format" and "Judging the result". If a draft skill was used, follow "After the job" in [new skills](features/new-skills.md). For every orchestrated job, update both `scores.md` files: each skill used in the job gets one result, counted once per job (see "Counting" in [reliability](features/reliability.md)). Copy the board's 1–2 most useful lines into the memory note, then delete the job folder ("At the end" in [board](features/board.md)).
+9. **Save to memory.** For big jobs, and for any job that failed or partly worked, follow [memory](features/memory.md) "Entry format" and "Judging the result" (append with `memory add` when the state utility is available). If a draft skill was used, follow "After the job" in [new skills](features/new-skills.md). For every orchestrated job, record each skill used in the job once with `result append` and rebuild both `scores.md` files with `scores sync` — counted once per job (see "Per-job results" in [reliability](features/reliability.md)). Copy the board's 1–2 most useful lines into the memory note, then close the job folder (`job close`, "At the end" in [board](features/board.md)).
 
 ## Switching modes
 
@@ -67,3 +67,4 @@ worked. Works in two modes, chosen automatically: **coding** and
 - **Memory file missing or unreadable:** continue without memory (see "Problems" in [memory](features/memory.md); never overwrite an unreadable file).
 - **A preferred skill is not installed:** use the closest installed match; if none comes close, follow [new skills](features/new-skills.md).
 - **The user folder is not writable** (e.g. a restricted or cloud environment): write project memory only.
+- **The state utility isn't available** (no Python, or a copy install without `scripts/`): follow the markdown rules in [board](features/board.md) and [reliability](features/reliability.md), and say so in one line.
