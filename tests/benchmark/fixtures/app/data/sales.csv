@@ -1,0 +1,6 @@
+region,units,unit_price,note
+North,10,4.50,
+South,5,10.00,
+North,2,4.50,
+East,,7.25,missing units
+West,3,2.00,

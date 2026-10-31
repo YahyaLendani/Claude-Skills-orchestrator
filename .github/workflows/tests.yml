@@ -20,4 +20,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - run: pip install -r requirements-dev.txt
-      - run: python -m pytest -q
+      - name: Structure tests
+        run: python -m pytest -q -m "not execution"
+      - name: Execution tests
+        run: python -m pytest -q -m execution

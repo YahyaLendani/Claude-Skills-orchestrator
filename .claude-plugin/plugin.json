@@ -1,7 +1,7 @@
 {
   "name": "skills-orchestrator",
   "displayName": "Skills Orchestrator",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "Picks and combines the right skills for a task, splits big jobs across agents with their own skills, and learns from what worked.",
   "author": {
     "name": "Yahya Lendani"

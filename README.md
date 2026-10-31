@@ -141,7 +141,7 @@ startup line. The checker then falls back to a fresh general-purpose agent
 with the same instructions, which is what it always did before the plugin
 existed.
 
-Current version: 1.4.1.
+Current version: 1.5.0.
 
 ## Quick start
 
@@ -182,7 +182,8 @@ agents/checker.md           the checker agent
 hooks/hooks.json            the one-line reminder at session start
 scripts/                    state utility: job ids, results, locks (stdlib Python)
 .claude-plugin/             plugin manifest, marketplace entry, icon
-tests/                      229 structure checks, 46 behavior scenarios
+tests/                      211 structure + 26 execution checks, 46 scenarios
+tests/benchmark/            4 tasks x 3 arms x 2 repeats, with a grader
 docs/superpowers/           the design spec and plan for each round
 ```
 
@@ -319,16 +320,18 @@ removed from `hooks/hooks.json`.
 
 ## Testing
 
-- **Structure checks:** `python3 -m pytest` runs 229 checks that every file
-  exists and contains the agreed rules (paths, reply options, rule order,
-  manifest fields, and so on). Install the test tools once with
+- **Structure checks:** `python3 -m pytest -m "not execution"` runs 211 checks
+  that every file exists and contains the agreed rules (paths, reply options,
+  rule order, manifest fields, and so on). Install the test tools once with
   `pip install -r requirements-dev.txt` (`pytest` and `pyyaml`). The same
   checks run on every push and pull request in CI, on Linux and Windows,
   Python 3.11 and 3.13.
-- **State checks:** 26 of those checks exercise the state utility itself,
-  including two writers appending at the same time and two `scores sync` runs
-  landing together. These are execution tests of the utility, not of the
-  model; the model-level behavior is in the behavior checks below.
+- **Execution checks:** `python3 -m pytest -m execution` runs 26 checks that
+  exercise the state utility itself, including two writers appending at the
+  same time and two `scores sync` runs landing together. They are kept apart
+  from the structure checks so a real behavior regression and a wording change
+  fail differently, and so the slow, subprocess-based checks are easy to point
+  at. The model-level behavior is in the behavior checks below.
 - **Behavior checks:** `tests/scenarios.md` lists 46 scenarios (11–16 cover the
   safety rules, 17–24 the reliability score and checker, 25–32 cards, trimming
   and the board, 33–40 the plugin, the startup line, `/orchestrate` and the
@@ -340,6 +343,14 @@ removed from `hooks/hooks.json`.
   that the skill changes behavior. The runs for 33–46 are still to be recorded;
   `tests/tools/` holds the harness that runs 33–40 (one session per scenario,
   a throwaway project, and the hook log as evidence).
+- **Benchmark:** `tests/benchmark/` runs 4 tasks x 3 arms x 2 repeats in real
+  Claude Code sessions: no skill, Superpowers only, and this plugin with
+  Superpowers. Every task is graded by checks that do not need a model (tests
+  pass, a new regression test fails on the original code, docs match code,
+  report numbers match the CSV), and the report keeps turns, tokens and wall
+  time. The harness is tested; the 24 runs are **not recorded yet** because the
+  development account hit its weekly limit (resets Nov 3). See
+  `tests/benchmark/README.md`.
 - **Plugin packaging:** `claude plugin validate . --strict` passes, and the
   manifest's own shape is covered by the pytest suite.
 
