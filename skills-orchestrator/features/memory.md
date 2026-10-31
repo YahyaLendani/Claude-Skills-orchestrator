@@ -94,6 +94,13 @@ Memory is kept in two places:
 **Writing:** write the new entry to both files when the user folder is
 available and writable. Otherwise write to the project only.
 
+**Two sessions at once:** when the state utility is available, append the entry
+with
+`python "${CLAUDE_PLUGIN_ROOT}/scripts/orchestrator_state.py" memory add --task "..." --type bugfix --mode "coding" --skills pdf,docs --split "2 agents" --result worked --note "..."`.
+It locks the file and adds one entry without rewriting the rest, so two sessions
+cannot drop each other's entries. Without the utility, re-read the file right
+before writing and keep any entries the other session added.
+
 **Where the project `.claude/` folder goes:** at the top of the repository
 (the folder that holds `.git`), even when you are working in a subfolder. If
 there is no git repository (common in documents mode), it goes in the current

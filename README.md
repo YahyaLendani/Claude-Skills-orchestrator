@@ -141,7 +141,7 @@ startup line. The checker then falls back to a fresh general-purpose agent
 with the same instructions, which is what it always did before the plugin
 existed.
 
-Current version: 1.3.0.
+Current version: 1.4.0.
 
 ## Quick start
 
@@ -180,8 +180,9 @@ skills-orchestrator/        the skill: one Markdown file per mode and feature
 commands/orchestrate.md     /orchestrate
 agents/checker.md           the checker agent
 hooks/hooks.json            the one-line reminder at session start
+scripts/                    state utility: job ids, results, locks (stdlib Python)
 .claude-plugin/             plugin manifest, marketplace entry, icon
-tests/                      188 structure checks, 40 behavior scenarios
+tests/                      223 structure checks, 40 behavior scenarios
 docs/superpowers/           the design spec and plan for each round
 ```
 
@@ -189,6 +190,34 @@ docs/superpowers/           the design spec and plan for each round
 needs it, so a job that does not touch memory never pays for the memory rules.
 The plugin is a thin layer over the same files: the skill folder is unchanged
 whether you install it as a plugin or copy it in.
+
+## State utility
+
+Job folders, result records and score files are written by a small Python
+script shipped with the plugin (`scripts/orchestrator_state.py`, standard
+library only). It makes the isolation rules true rather than instructions:
+
+```bash
+python scripts/orchestrator_state.py job new --task "fix bug + report" --agents 2
+python scripts/orchestrator_state.py result append --id <job> --skill pdf:worked --skill docs:partly
+python scripts/orchestrator_state.py scores sync
+python scripts/orchestrator_state.py memory add --task "..." --type bugfix --mode coding --skills pdf,docs --split "2 agents" --result worked
+python scripts/orchestrator_state.py job close --id <job>
+```
+
+- Every job gets a unique id and its own folder, so two sessions in one project
+  cannot collide.
+- Results are append-only, one file per job, and `scores sync` rebuilds
+  `scores.md` from them. Two sessions can finish at once without losing counts.
+- Writes are atomic (temp file, then replace), and `memory.md` and `scores.md`
+  updates take a lock. A crashed session's lock is broken after 60 seconds.
+- Leftover job folders are collected only when they are older than 7 days, so a
+  live session is never deleted by another one.
+
+The same rules stay in the markdown for copy installs and environments without
+Python. [`docs/guarantees.md`](docs/guarantees.md) lists what is enforced by
+code and what depends on the model. Without the script, the isolation
+guarantees drop to "the model follows the instructions".
 
 ## Design decisions
 
@@ -258,6 +287,13 @@ affects other agents (a finding, decision, blocker or question), one line at a
 time, never secrets. At the end, the 1–2 most useful lines go into the memory
 note and the job folder is deleted, so nothing piles up or gets committed.
 
+**Concurrent sessions are isolated by construction.** Earlier versions named
+job folders by the minute and told each new job to delete leftovers, so two
+sessions in one project could delete each other's work. Jobs now have unique
+ids and owners, results are append-only per job, and cleanup is age-based.
+`memory.md` and `scores.md` are written under a lock, and their updates are
+atomic, so a session that crashes mid-write cannot leave a half-written file.
+
 **The startup line is one sentence, not a mode.** It is there so the
 orchestrator gets considered, not so it runs. The sentence ends by saying to
 ignore it for a simple one-skill task, and the skill's own "when not to use"
@@ -273,23 +309,31 @@ removed from `hooks/hooks.json`.
   contents, passwords or keys.
 - The board is deleted at the end of each job and is never committed.
 - The checker sees the task, the skills and the evidence, never the full chat.
+- Job folders, memory and scores are written through the state utility with
+  unique ids, append-only results and locks; a second session cannot overwrite
+  or delete the first one's state.
 
 ## Testing
 
-- **Structure checks:** `python3 -m pytest` runs 188 checks that every file
+- **Structure checks:** `python3 -m pytest` runs 223 checks that every file
   exists and contains the agreed rules (paths, reply options, rule order,
   manifest fields, and so on). Install the test tools once with
   `pip install -r requirements-dev.txt` (`pytest` and `pyyaml`). The same
   checks run on every push and pull request in CI, on Linux and Windows,
   Python 3.11 and 3.13.
-- **Behavior checks:** `tests/scenarios.md` lists 40 scenarios (11–16 cover the
+- **State checks:** 24 of those checks exercise the state utility itself,
+  including two writers appending at the same time and two `scores sync` runs
+  landing together. These are execution tests of the utility, not of the
+  model; the model-level behavior is in the behavior checks below.
+- **Behavior checks:** `tests/scenarios.md` lists 43 scenarios (11–16 cover the
   safety rules, 17–24 the reliability score and checker, 25–32 cards, trimming
   and the board, 33–40 the plugin, the startup line, `/orchestrate` and the
-  checker agent). Scenarios 1–32 have recorded before and after runs
+  checker agent, 41–43 concurrent sessions, interrupted jobs and the fallback).
+  Scenarios 1–32 have recorded before and after runs
   (`tests/results/baseline.md`, `tests/results/round-a-baseline.md`,
   `tests/results/round-b-baseline.md`, `tests/results/with-skill.md`) showing
-  that the skill changes behavior. The runs for 33–40 are still to be recorded;
-  `tests/tools/` holds the harness that runs them (one session per scenario,
+  that the skill changes behavior. The runs for 33–43 are still to be recorded;
+  `tests/tools/` holds the harness that runs 33–40 (one session per scenario,
   a throwaway project, and the hook log as evidence).
 - **Plugin packaging:** `claude plugin validate . --strict` passes, and the
   manifest's own shape is covered by the pytest suite.

@@ -28,8 +28,9 @@ If no search tool is available, or nothing fits, go to "Draft a skill".
 4. Give it to the agent doing that subtask, like any other skill.
 5. Label it in the preview: `🆕 Draft skill: <name> (created for this task)`.
 6. Drafts are temporary: never include the drafts folder in a commit. At the
-   start of a new job, delete any draft left over from an earlier job that was
-   never saved (for example because the user never answered the preview).
+   start of a new job, delete any draft left over from an earlier job only when
+   its folder is older than 7 days; never delete a recent draft, because another
+   session may be using it.
 
 ## After the job
 
