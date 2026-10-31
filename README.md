@@ -1,7 +1,7 @@
 # Skills Orchestrator
 
-[![tests](https://github.com/YahyaLendani/Skills-orchestrator/actions/workflows/tests.yml/badge.svg)](https://github.com/YahyaLendani/Skills-orchestrator/actions/workflows/tests.yml)
-[![release](https://img.shields.io/github/v/release/YahyaLendani/Skills-orchestrator?color=blue)](https://github.com/YahyaLendani/Skills-orchestrator/releases)
+[![tests](https://github.com/YahyaLendani/Claude-Skills-orchestrator/actions/workflows/tests.yml/badge.svg)](https://github.com/YahyaLendani/Claude-Skills-orchestrator/actions/workflows/tests.yml)
+[![release](https://img.shields.io/github/v/release/YahyaLendani/Claude-Skills-orchestrator?color=blue)](https://github.com/YahyaLendani/Claude-Skills-orchestrator/releases)
 [![license](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![python](https://img.shields.io/badge/python-3.11%20%7C%203.13-3776ab.svg)](#testing)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin%20%2B%20skill-d97757.svg)](#install)
@@ -102,14 +102,14 @@ manual option, and it gives you the skill on its own.
 **As a plugin** (recommended):
 
 ```bash
-/plugin marketplace add YahyaLendani/Skills-orchestrator
+/plugin marketplace add YahyaLendani/Claude-Skills-orchestrator
 /plugin install skills-orchestrator@skills-orchestrator
 ```
 
 That installs the skill, the `/orchestrate` command, the `checker` agent, and a
 one-line reminder at the start of each session. Update it with
 `/plugin update skills-orchestrator`. To try a local checkout without
-installing anything: `claude --plugin-dir /path/to/Skills-orchestrator`.
+installing anything: `claude --plugin-dir /path/to/Claude-Skills-orchestrator`.
 
 **By copying the folder** (the skill only):
 
@@ -119,17 +119,17 @@ Markdown files, with no scripts.
 **For all your projects** (your user folder):
 
 ```bash
-git clone https://github.com/YahyaLendani/Skills-orchestrator.git
+git clone https://github.com/YahyaLendani/Claude-Skills-orchestrator.git
 ```
 
 ```bash
-mkdir -p ~/.claude/skills && rm -rf ~/.claude/skills/skills-orchestrator && cp -r Skills-orchestrator/skills-orchestrator ~/.claude/skills/skills-orchestrator
+mkdir -p ~/.claude/skills && rm -rf ~/.claude/skills/skills-orchestrator && cp -r Claude-Skills-orchestrator/skills-orchestrator ~/.claude/skills/skills-orchestrator
 ```
 
 **For one project only** (run inside that project):
 
 ```bash
-mkdir -p .claude/skills && rm -rf .claude/skills/skills-orchestrator && cp -r /path/to/Skills-orchestrator/skills-orchestrator .claude/skills/skills-orchestrator
+mkdir -p .claude/skills && rm -rf .claude/skills/skills-orchestrator && cp -r /path/to/Claude-Skills-orchestrator/skills-orchestrator .claude/skills/skills-orchestrator
 ```
 
 The `rm -rf` removes an older copy first, so updating works the same way as
@@ -141,7 +141,7 @@ startup line. The checker then falls back to a fresh general-purpose agent
 with the same instructions, which is what it always did before the plugin
 existed.
 
-Current version: 1.4.0.
+Current version: 1.4.1.
 
 ## Quick start
 
@@ -182,7 +182,7 @@ agents/checker.md           the checker agent
 hooks/hooks.json            the one-line reminder at session start
 scripts/                    state utility: job ids, results, locks (stdlib Python)
 .claude-plugin/             plugin manifest, marketplace entry, icon
-tests/                      223 structure checks, 40 behavior scenarios
+tests/                      229 structure checks, 46 behavior scenarios
 docs/superpowers/           the design spec and plan for each round
 ```
 
@@ -271,16 +271,20 @@ flagged, never swapped silently.
 **Skill cards are made automatically and kept as a cache.** Most skills are
 written by other people, so asking you to write cards would mean most skills
 never get one. The orchestrator reads a skill the first time it's used, writes
-a short card next to where the skill is installed, and rebuilds it when the
-skill changes (it keeps a fingerprint of the skill file). Your skills are never
-modified, and a lost card is simply made again.
+a short card next to where the skill is installed, and rebuilds it when any
+file in the skill folder changes (the fingerprint covers the whole folder, not
+just `SKILL.md`). Your skills are never modified, and a lost card is simply
+made again.
 
-**Big skills are cut down with temporary copies, and the key rules always stay
-in.** A trimmed copy holds only the sections an agent's task needs, so it can't
-wander off into the rest. The skill's key rules are always included, so cutting
-never drops something the skill insists on, and the copy names the full
-skill's path in case something is missing. Small skills (150 lines or fewer)
-are given whole.
+**Big skills are cut down only when their author says it is safe.** A trimmed
+copy holds only the sections an agent's task needs, but a section is eligible
+only when it carries `<!-- orchestrator:standalone -->`; without markers the
+whole skill is given. The copy always includes its key rules and every
+mandatory line, plus the verification, prerequisites and testing sections,
+copied from the original and never summarized from the card. If the mandatory
+content plus the chosen sections is over half the skill, it is given whole. The
+checker reads the original skill too, so a rule the card omitted is still
+checked.
 
 **The board is short and deleted after each job.** Agents post only what
 affects other agents (a finding, decision, blocker or question), one line at a
@@ -315,24 +319,25 @@ removed from `hooks/hooks.json`.
 
 ## Testing
 
-- **Structure checks:** `python3 -m pytest` runs 223 checks that every file
+- **Structure checks:** `python3 -m pytest` runs 229 checks that every file
   exists and contains the agreed rules (paths, reply options, rule order,
   manifest fields, and so on). Install the test tools once with
   `pip install -r requirements-dev.txt` (`pytest` and `pyyaml`). The same
   checks run on every push and pull request in CI, on Linux and Windows,
   Python 3.11 and 3.13.
-- **State checks:** 24 of those checks exercise the state utility itself,
+- **State checks:** 26 of those checks exercise the state utility itself,
   including two writers appending at the same time and two `scores sync` runs
   landing together. These are execution tests of the utility, not of the
   model; the model-level behavior is in the behavior checks below.
-- **Behavior checks:** `tests/scenarios.md` lists 43 scenarios (11–16 cover the
+- **Behavior checks:** `tests/scenarios.md` lists 46 scenarios (11–16 cover the
   safety rules, 17–24 the reliability score and checker, 25–32 cards, trimming
   and the board, 33–40 the plugin, the startup line, `/orchestrate` and the
-  checker agent, 41–43 concurrent sessions, interrupted jobs and the fallback).
+  checker agent, 41–43 concurrent sessions, interrupted jobs and the fallback,
+  44–46 conservative trimming and the checker reading originals).
   Scenarios 1–32 have recorded before and after runs
   (`tests/results/baseline.md`, `tests/results/round-a-baseline.md`,
   `tests/results/round-b-baseline.md`, `tests/results/with-skill.md`) showing
-  that the skill changes behavior. The runs for 33–43 are still to be recorded;
+  that the skill changes behavior. The runs for 33–46 are still to be recorded;
   `tests/tools/` holds the harness that runs 33–40 (one session per scenario,
   a throwaway project, and the hook log as evidence).
 - **Plugin packaging:** `claude plugin validate . --strict` passes, and the

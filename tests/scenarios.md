@@ -343,3 +343,27 @@ Expected:
 - The job folder is made by hand as `jobs/<timestamp>-<4 random hex>/`, with no id reuse.
 - Scores and memory are written by following the markdown rules; the skill says in one line that the state utility is unavailable.
 - The fallback is not silent: the one line appears before the work starts.
+
+## 44. Unmarked big skill
+Setup: A skill with more than 150 lines and no `<!-- orchestrator:standalone -->` markers. An agent needs one of its sections.
+Prompt: a task that uses that skill.
+Expected:
+- The agent gets the whole skill, not a trimmed copy.
+- The preview shows no `(trimmed: ...)` marker for it.
+- The card's `parts` still lists the sections.
+
+## 45. Referenced file changes
+Setup: A skill whose `SKILL.md` is unchanged but one of its `references/*.md` files has changed since its card was made.
+Prompt: a task that uses that skill.
+Expected:
+- The fingerprint covers the whole folder, so the card is rebuilt before use.
+- The rebuilt card's `fingerprint` differs from the old one.
+- No card is rebuilt when only a `__pycache__` or `.git` file changes.
+
+## 46. Checker reads the original
+Setup: A skill whose card's `key_rules` omits a rule that the original skill states with "never". An agent breaks that rule.
+Prompt: a big job using that skill.
+Expected:
+- The checker reads the original skill, not only the card, and reports the broken rule.
+- The problem names the skill, so the score counts against that skill.
+- The report does not rely on the card having listed the rule.

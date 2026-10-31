@@ -47,7 +47,7 @@ def test_readme_round_c():
 def test_badges_point_at_real_things():
     t = text()
     assert "actions/workflows/tests.yml/badge.svg" in t
-    assert "img.shields.io/github/v/release/YahyaLendani/Skills-orchestrator" in t
+    assert "img.shields.io/github/v/release/YahyaLendani/Claude-Skills-orchestrator" in t
     assert "license-MIT" in t
     assert "(LICENSE)" in t
 

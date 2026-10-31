@@ -668,6 +668,43 @@ def reset_score(project: Path, skill: str, user_dir=None, scope: str = "both", o
     return {"skill": skill, "reset_on": day, "written": done}
 
 
+# ---------------------------------------------------------------- fingerprint
+
+def fingerprint(path: Path) -> dict:
+    """One hash over every file in a skill folder.
+
+    Changing a referenced file must refresh the skill's card, not just changing
+    `SKILL.md`, so the digest covers relative paths and each file's SHA-256.
+    """
+    folder = Path(path).resolve()
+    if folder.is_file():
+        folder = folder.parent
+    if not folder.is_dir():
+        raise StateError(f"not a folder: {folder}")
+
+    files = []
+    for item in sorted(folder.rglob("*")):
+        if not item.is_file():
+            continue
+        rel = item.relative_to(folder)
+        if any(part in (".git", "__pycache__", ".pytest_cache") for part in rel.parts):
+            continue
+        if item.name == ".DS_Store":
+            continue
+        files.append((rel.as_posix(), hashlib.sha256(item.read_bytes()).hexdigest()))
+
+    digest = hashlib.sha256()
+    for rel, file_hash in files:
+        digest.update(rel.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(file_hash.encode("ascii"))
+        digest.update(b"\n")
+
+    skill_md = folder / "SKILL.md"
+    lines = len(skill_md.read_text(encoding="utf-8").splitlines()) if skill_md.is_file() else 0
+    return {"fingerprint": digest.hexdigest()[:12], "lines": lines, "files": len(files)}
+
+
 # ---------------------------------------------------------------- validate
 
 def validate(project: Path) -> dict:
@@ -783,13 +820,16 @@ def build_parser() -> argparse.ArgumentParser:
 
     check = sub.add_parser("validate", help="check job and result files")
     check.add_argument("--project")
+
+    print_ = sub.add_parser("fingerprint", help="hash every file in a skill folder")
+    print_.add_argument("path")
     return parser
 
 
 def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
     try:
-        project = find_project(args.project)
+        project = find_project(getattr(args, "project", None))
         if args.command == "job":
             if args.action == "new":
                 out = new_job(project, args.task, args.agents, args.session)
@@ -820,8 +860,10 @@ def main(argv=None) -> int:
                 out = reset_score(project, args.skill, args.user_dir, args.scope, args.on)
                 out["sync"] = sync_scores(project, args.user_dir,
                                           include_user=args.scope in ("user", "both"))
-        else:
+        elif args.command == "validate":
             out = validate(project)
+        else:
+            out = fingerprint(args.path)
     except StateError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2

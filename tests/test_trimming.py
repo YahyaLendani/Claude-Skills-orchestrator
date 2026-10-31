@@ -18,7 +18,7 @@ def test_trimming_sections():
 
 def test_threshold_and_whole_cases():
     w = section(text(), "## When to trim")
-    for s in ["over 150", "given whole", "80%", "no part matches"]:
+    for s in ["over 150", "given whole", "50%", "no part matches"]:
         assert s in w, s
 
 
@@ -55,5 +55,19 @@ def test_never_edit_original():
     assert "Never edit the original skill" in text()
 
 
-def test_80_percent_by_lines():  # Task 7 fix
-    assert "80% of the skill's lines" in section(text(), "## When to trim")
+def test_50_percent_by_lines():  # v1.4.1: conservative threshold
+    assert "50% of the skill's lines" in section(text(), "## When to trim")
+
+
+def test_standalone_markers():
+    w = section(text(), "## When to trim")
+    assert "<!-- orchestrator:standalone -->" in w
+    assert "<!-- orchestrator:no-trim -->" in w
+    assert "default is the whole skill" in w
+
+
+def test_mandatory_rules_copied_from_original():
+    m = section(text(), "## Making the trimmed copy")
+    assert "every mandatory line" in m
+    assert "never summarize them from the card" in m
+    assert "Prerequisites" in m and "Verification" in m
