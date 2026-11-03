@@ -96,7 +96,9 @@ sys.exit(orchestrator_state.main(sys.argv[3:]))
 
 class Base(unittest.TestCase):
     def setUp(self):
-        self.tmp = Path(tempfile.mkdtemp(prefix="orch-state-"))
+        # Resolved because the script resolves its paths, and a temp path can be a
+        # short name (RUNNER~1 on Windows CI) or go through a link.
+        self.tmp = Path(tempfile.mkdtemp(prefix="orch-state-")).resolve()
         self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
         for parent in self.tmp.parents:
             if (parent / ".git").exists():
