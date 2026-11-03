@@ -46,6 +46,6 @@ When a skill disagrees with the user's own request (rule 1), name the request in
 
 If there are no conflicts, the preview shows `⚖️ Conflicts: none`.
 
-If the job has no preview (one agent, no draft), show the conflict line on its
+If the job has no preview (one part in the main session, no draft), show the conflict line on its
 own before starting the work. If the conflict is still tied after rule 4, ask
 the user in one short question and wait for the answer before starting.

@@ -1,8 +1,16 @@
 # Cutting big skills down
 
-Each agent gets only the parts of a big skill its task needs, plus every
-mandatory rule, in a temporary trimmed copy. The original skill is never
-changed. Uses the skill's card (`features/cards.md`).
+A big skill may be cut down for an agent only when its author marked the
+matching sections as safe to use alone. The agent then gets those sections plus
+every mandatory rule, in a temporary trimmed copy. Without those markers the
+whole skill is given. The original skill is never changed. Uses the skill's card
+(`features/cards.md`).
+
+## Quick check
+
+If the skill's `SKILL.md` has no `orchestrator:standalone` marker, give the whole
+skill and stop here. This is the normal case until skill authors add markers;
+to make one of your own big skills trimmable, add them as described below.
 
 ## When to trim
 
@@ -37,8 +45,9 @@ with that agent's own sections.
 
 ## Making the trimmed copy
 
-Write it to `jobs/<id>/trimmed/<skill>-agent<n>.md` in the job folder (see
-`features/board.md` "When there is a board" for the job folder). It contains,
+Write it to `jobs/<id>/trimmed/<safe name>-agent<n>.md` in the job folder (see
+`features/board.md` "When there is a board" for the job folder, and
+`features/cards.md` "Card format" for the safe name). It contains,
 in this order:
 
 1. A note at the top: `Trimmed copy of <skill> for this job: sections <A>, <B>. Full skill: <absolute path to SKILL.md>. If you need something that isn't here, open the full skill and say so in your handback.`
@@ -66,4 +75,4 @@ Mark trimmed skills on the agent line with the sections each agent gets, e.g.
 - **A section isn't marked standalone:** give the skill whole. Don't guess that it is safe.
 - **The copy can't be written:** give the skill whole.
 - **An agent opened the full skill** (and said so in its handback): fine — note which part was missing, so the card's `covers` can be improved when the card is next rebuilt.
-- The trimmed copies are deleted with the job folder at the end of the job (`features/board.md` "At the end").
+- The trimmed copies are removed with the job folder when `job gc` collects an old `closed` or `abandoned` job; closing a job keeps them until then (`features/board.md` "At the end").

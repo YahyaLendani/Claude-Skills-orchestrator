@@ -146,26 +146,25 @@ def test_agent_is_read_only():
         assert tool in tools, tool
     for tool in ("Edit", "Write", "MultiEdit"):
         assert tool not in tools, f"{tool} would let the checker fix things"
-    assert "never fix" in body
+    assert "never fix" in read(CHECKER_FEATURE)
 
 
 def test_agent_report_matches_feature():
     _, agent = front(read(AGENT))
     feature = read(CHECKER_FEATURE)
+    assert "features/checker.md" in agent
     for line in ("🔍 Checker report", "✅ pass", "⚠️ <n> problems"):
-        assert line in agent, line
         assert line in feature, line
 
 
 def test_agent_does_not_redo_work():
-    _, body = front(read(AGENT))
-    assert "Do not redo the work" in body
+    assert "Don't redo the work" in read(CHECKER_FEATURE)
 
 
 def test_skill_step_8_names_agent_and_fallback():
     skill = (ROOT / "skills-orchestrator" / "SKILL.md").read_text(encoding="utf-8")
     assert "skills-orchestrator:checker" in skill
-    assert "fresh general-purpose agent" in skill
+    assert "fresh agent that can run commands" in skill
 
 
 def test_checker_feature_points_at_agent():

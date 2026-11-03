@@ -15,7 +15,7 @@ def test_preview_sections():
 
 
 def test_preview_trigger():
-    assert "2 or more agents" in text()
+    assert "the plan starts any agent" in text()
     assert "draft or suggested skill" in text()
 
 

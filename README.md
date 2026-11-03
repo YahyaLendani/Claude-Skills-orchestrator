@@ -113,8 +113,8 @@ installing anything: `claude --plugin-dir /path/to/Claude-Skills-orchestrator`.
 
 **By copying the folder** (the skill only):
 
-The skill is the `skills-orchestrator/` folder in this repo. It contains only
-Markdown files, with no scripts.
+The skill is the `skills-orchestrator/` folder in this repo: Markdown files plus
+the state utility (`scripts/orchestrator_state.py`, standard library only).
 
 **For all your projects** (your user folder):
 
@@ -137,11 +137,11 @@ installing. Start a new Claude Code session afterwards so the skill is picked
 up.
 
 A copied install gets the skill but not the command, the checker agent or the
-startup line. The checker then falls back to a fresh general-purpose agent
-with the same instructions, which is what it always did before the plugin
+startup line. The checker then falls back to a fresh agent that can run
+commands, with the same instructions, which is what it always did before the plugin
 existed.
 
-Current version: 1.5.0.
+Current version: 1.6.0.
 
 ## Quick start
 
@@ -176,14 +176,15 @@ skills-orchestrator/        the skill: one Markdown file per mode and feature
   SKILL.md                  the nine-step flow, read first
   modes/                    coding.md, documents.md
   features/                 memory, conflicts, new skills, preview, reliability,
-                            checker, cards, trimming, board
+                            checker, cards, trimming, board, running agents, trust
+  scripts/                  state utility: job ids, results, locks (stdlib Python)
 commands/orchestrate.md     /orchestrate
 agents/checker.md           the checker agent
 hooks/hooks.json            the one-line reminder at session start
-scripts/                    state utility: job ids, results, locks (stdlib Python)
 .claude-plugin/             plugin manifest, marketplace entry, icon
-tests/                      211 structure + 26 execution checks, 46 scenarios
+tests/                      211 structure + 173 execution checks, 46 scenarios
 tests/benchmark/            4 tasks x 3 arms x 2 repeats, with a grader
+evals/                      trigger tests and blind trap cases (billed runs)
 docs/superpowers/           the design spec and plan for each round
 ```
 
@@ -195,25 +196,37 @@ whether you install it as a plugin or copy it in.
 ## State utility
 
 Job folders, result records and score files are written by a small Python
-script shipped with the plugin (`scripts/orchestrator_state.py`, standard
-library only). It makes the isolation rules true rather than instructions:
+script shipped inside the skill folder
+(`skills-orchestrator/scripts/orchestrator_state.py`, standard library only),
+so a copied install gets it too. It makes the isolation rules true rather than
+instructions. Run it from your project folder, not from inside the skill. With
+`S` set to the script's full path:
 
 ```bash
-python scripts/orchestrator_state.py job new --task "fix bug + report" --agents 2
-python scripts/orchestrator_state.py result append --id <job> --skill pdf:worked --skill docs:partly
-python scripts/orchestrator_state.py scores sync
-python scripts/orchestrator_state.py memory add --task "..." --type bugfix --mode coding --skills pdf,docs --split "2 agents" --result worked
-python scripts/orchestrator_state.py job close --id <job>
+python "$S" job new --task "fix bug + report" --agents 2 --session <session>
+python "$S" result append --id <job> --session <session> --category bugfix --skill pdf:worked --evidence "pdf=artifact:out.pdf" --skill docs:partly --problem "docs=missed a section"
+python "$S" scores sync
+python "$S" memory add --task "..." --type bugfix --mode coding --skills pdf,docs --split "2 agents" --result worked --note "..."
+python "$S" job close --id <job> --session <session>
+python "$S" job list
+python "$S" validate
 ```
 
 - Every job gets a unique id and its own folder, so two sessions in one project
   cannot collide.
+- Each job records its owning session, and other sessions can't change it. A
+  job whose owner is gone can be taken over only with `job recover --confirm`.
 - Results are append-only, one file per job, and `scores sync` rebuilds
   `scores.md` from them. Two sessions can finish at once without losing counts.
+- A `worked` result with no evidence for that skill is stored as `unverified`.
 - Writes are atomic (temp file, then replace), and `memory.md` and `scores.md`
-  updates take a lock. A crashed session's lock is broken after 60 seconds.
-- Leftover job folders are collected only when they are older than 7 days, so a
-  live session is never deleted by another one.
+  updates take an operating-system lock, which ends when the process ends, even
+  after a crash.
+- `job close` marks a job closed and keeps its record. `job gc` removes only
+  `closed` or `abandoned` folders older than 7 days, and reports an old `active`
+  job instead of deleting it, so a live session is never deleted by another one.
+- `job list` and `validate` show the records and report broken ones. They change
+  nothing.
 
 The same rules stay in the markdown for copy installs and environments without
 Python. [`docs/guarantees.md`](docs/guarantees.md) lists what is enforced by
@@ -326,7 +339,7 @@ removed from `hooks/hooks.json`.
   `pip install -r requirements-dev.txt` (`pytest` and `pyyaml`). The same
   checks run on every push and pull request in CI, on Linux and Windows,
   Python 3.11 and 3.13.
-- **Execution checks:** `python3 -m pytest -m execution` runs 26 checks that
+- **Execution checks:** `python3 -m pytest -m execution` runs 173 checks that
   exercise the state utility itself, including two writers appending at the
   same time and two `scores sync` runs landing together. They are kept apart
   from the structure checks so a real behavior regression and a wording change
@@ -351,6 +364,18 @@ removed from `hooks/hooks.json`.
   time. The harness is tested; the 24 runs are **not recorded yet** because the
   development account hit its weekly limit (resets Nov 3). See
   `tests/benchmark/README.md`.
+- **Evals:** `evals/` holds billed runs against real Claude Code sessions.
+  `python evals/run_triggers.py --arm real --label baseline` tests when the
+  installed description fires. `python evals/run_blind.py --iteration <n> --runs 3`
+  runs four trap cases on a planner that isn't told about the traps, and
+  `python evals/grade_blind.py --iteration <n>` grades them. A blind run uses a
+  copy of the skill folder, so its checker is the fallback agent, not the
+  plugin's. Seen on Opus 5.5: $9.06 for the 72-run trigger set, and $0.33 to
+  $2.11 per blind run. **Current result:** no trap worked in any valid run, but
+  the two no-skill baselines avoided theirs too, so these runs show no safety
+  gain from the skill, at about 2 to 3 times the cost. Its flow is also unsteady:
+  firing and previews dropped sharply between two runs on the same day, cause
+  unknown. See [`evals/RESULTS.md`](evals/RESULTS.md).
 - **Plugin packaging:** `claude plugin validate . --strict` passes, and the
   manifest's own shape is covered by the pytest suite.
 
