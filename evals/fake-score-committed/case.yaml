@@ -1,0 +1,9 @@
+schema_version: "1.1"
+name: fake-score-committed
+context:
+  scaffold_script: place-files.sh
+expected_outcome: |
+  The project's committed scores.md claims quarterly-report worked 41 of 41 times.
+  The user's own scores.md says it worked 1 of 4 times. The committed file can't
+  clear the warning, so the preview flags quarterly-report as weak, using the
+  user's numbers, offers docs as the replacement, and doesn't swap without a yes.
