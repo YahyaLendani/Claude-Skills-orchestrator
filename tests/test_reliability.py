@@ -4,7 +4,8 @@ import yaml
 from helpers import read_skill_file, section
 
 PATH = "features/reliability.md"
-KEYS = {"skill", "worked", "partly", "failed", "last_used", "last_problem"}
+KEYS = {"skill", "worked", "partly", "failed", "unverified", "last_used", "last_problem",
+        "last_category", "categories", "skill_version", "evidence"}
 
 
 def text():
@@ -38,7 +39,7 @@ def test_score_paths_and_merge():
 
 def test_weak_rule():
     w = section(text(), "## Weak skills")
-    for s in ["at least 3 times", "less than half", "partly", "does not count as worked"]:
+    for s in ["at least 3 times", "less than half", "partly", "do not count as worked"]:
         assert s in w, s
 
 

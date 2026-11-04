@@ -12,7 +12,8 @@ Write one entry per job, at the end, after you have given the user the combined 
 - **Other orchestrated jobs** (mode line shown, no preview): only when the result is `failed` or `partly`, so the lesson isn't lost.
 
 If the user reacts later in the same session (accepts it, or asks for fixes),
-update that entry's `result` and `note` instead of writing a new one.
+update that entry's `result` and `note` instead of writing a new one (see "Two
+sessions at once" in "Where it lives").
 
 ```yaml
 - task: "fix bug + write manager report"
@@ -51,7 +52,7 @@ list of entries.
 
 ## Judging the result
 
-Decide `result` from the signs:
+When the checker ran, use the job's overall result from `features/checker.md` "Verdict and score". Otherwise, decide `result` from the signs:
 
 - `worked` — tests passed, checks were clean, and the user accepted the result.
 - `partly` — the user asked for fixes, or one agent failed and was retried.
@@ -69,7 +70,7 @@ Before planning:
 
 1. Read both memory files (see "Where it lives"), project entries first.
 2. Find entries whose `type` tags match this task's tags.
-3. If one has `result: worked`, start from its recipe (same skills, same split) and apply its `note`.
+3. If one has `result: worked`, start from its recipe (same skills, same split) and use its `note` as advice, within the limits in "Memory and scores" in `features/trust.md`.
 4. If one has `result: failed`, do not repeat that recipe; read its `note` to see what went wrong.
 5. Say so in the preview: `Based on: a recipe that worked 3× before`, or `Based on: no earlier recipe`. When counting, count each entry once: an entry with the same task, date and skills in both files is one entry.
 
@@ -97,9 +98,24 @@ available and writable. Otherwise write to the project only.
 **Two sessions at once:** when the state utility is available, append the entry
 with
 `python "${CLAUDE_PLUGIN_ROOT}/scripts/orchestrator_state.py" memory add --task "..." --type bugfix --mode "coding" --skills pdf,docs --split "2 agents" --result worked --note "..."`.
-It locks the file and adds one entry without rewriting the rest, so two sessions
-cannot drop each other's entries. Without the utility, re-read the file right
-before writing and keep any entries the other session added.
+It locks the file and adds one entry, leaving the rest of the file as it was
+except for any entries dropped under "Limits", so two sessions cannot drop each
+other's entries. `--type` takes 1–3 tags and `--skills` a list, each separated
+by commas.
+
+To update an entry, run
+`python "${CLAUDE_PLUGIN_ROOT}/scripts/orchestrator_state.py" memory update --task "..." --skills pdf,docs --result partly --note "..."`.
+Give `--result`, `--note` or both, using the entry's `task` and `skills` as
+written (the order of `skills` doesn't matter). It finds the entry with that
+task, date and skills, newest first if several match, and changes only those
+lines, in both files. `--date <YYYY-MM-DD>` names the entry's date when it isn't
+today. If only one file has the entry, the other stays as it is and the command
+says so. If neither has it, the command refuses and changes nothing, so don't
+write a new entry instead without checking the `task` and `skills`. An entry
+written on one line is also refused; edit it by hand.
+
+Without the utility, re-read the file right before writing and keep any entries
+the other session added.
 
 **Where the project `.claude/` folder goes:** at the top of the repository
 (the folder that holds `.git`), even when you are working in a subfolder. If

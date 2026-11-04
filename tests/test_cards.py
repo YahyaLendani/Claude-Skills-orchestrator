@@ -36,7 +36,7 @@ def test_parts_are_exact_headings():
 
 def test_card_paths():
     w = section(text(), "## Where cards live")
-    for s in ["~/.claude/skills-orchestrator/cards/<skill>.md", ".claude/skills-orchestrator/cards/<skill>.md", "plugin"]:
+    for s in ["cards/<safe name>.md", "plugin"]:
         assert s in w, s
 
 

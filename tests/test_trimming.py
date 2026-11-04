@@ -29,7 +29,7 @@ def test_no_headings_given_whole():  # Review Focus 1
 
 def test_copy_path_and_per_agent():  # Review Focus 2
     t = text()
-    assert "jobs/<id>/trimmed/<skill>-agent<n>.md" in t and "one copy per agent" in t
+    assert "jobs/<id>/trimmed/<safe name>-agent<n>.md" in t and "one copy per agent" in t
 
 
 def test_copy_order():

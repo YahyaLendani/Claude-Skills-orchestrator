@@ -17,14 +17,23 @@ Pick from this list, in this order of usefulness for the kind of work:
 | Kind of work | Preferred skill |
 |---|---|
 | Finding the cause of a bug or failure | debugging (e.g. `systematic-debugging`) |
-| Writing or changing behavior | test-driven development (e.g. `test-driven-development`) |
+| Writing or changing behavior | test-driven development (e.g. `test-driven-development`, `tdd-guide`) |
 | Multi-step feature work | writing plans (e.g. `writing-plans`) |
-| Checking finished work | code review (e.g. `requesting-code-review`) |
+| Checking finished work | code review (e.g. `requesting-code-review`, `code-reviewer`, `pr-review-expert`) |
 | Several independent problems at once | parallel agents (e.g. `dispatching-parallel-agents`) |
+| Security | security review (e.g. `security-review`, `security-guidance`) |
+| Databases, schemas, queries | database work (e.g. `database-designer`, `sql-database-assistant`) |
+| Moving data or systems | migrations (e.g. `migration-architect`) |
+| Speed and load | performance (e.g. `performance-profiler`) |
+| Screens and components | frontend (e.g. `senior-frontend`, `a11y-audit`) |
+| Designing or testing an API | API work (e.g. `api-design-reviewer`, `api-test-suite-builder`) |
+| Build and deploy pipelines | CI/CD (e.g. `ci-cd-pipeline-builder`) |
+| Packages and versions | dependencies (e.g. `dependency-auditor`) |
 
-These names are hints, not requirements. Read the list of skills that are
-actually installed and use the closest installed match for each kind of work.
-If nothing installed comes close, follow `../features/new-skills.md`.
+These names are hints, not requirements. Use the list of skills offered in this
+session, not folders on disk (a folder may be disabled or in the trash), and
+pick the closest match for each kind of work. If nothing offered comes close,
+follow `../features/new-skills.md`.
 
 ## Conflict rule
 

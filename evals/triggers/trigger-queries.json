@@ -1,0 +1,27 @@
+[
+  {"query": "fix this bug and write a report for my manager", "should_trigger": true, "from": "required; description example"},
+  {"query": "reset score for pdf", "should_trigger": true, "from": "required; description, reset command"},
+  {"query": "reset the score for code-reviewer, i rewrote that skill yesterday so the old numbers dont mean anything", "should_trigger": true, "from": "description, reset command, loose wording"},
+  {"query": "the checkout page throws a 500 when the cart is empty. track it down, fix it, add a regression test, and then make me a 3 slide deck for friday's exec review explaining what happened", "should_trigger": true, "from": "When to use: two or more skills; coding + documents"},
+  {"query": "Go through Q3_sales.xlsx in my downloads, remove the duplicate rows, chart revenue by region, and turn the whole thing into a two page PDF for the board", "should_trigger": true, "from": "When to use: two or more skills; documents only"},
+  {"query": "we need dark mode on the settings page, unit tests for the toggle, and a security review of the new preferences endpoint before it ships. those could probably all run at the same time", "should_trigger": true, "from": "When to use: separate parts that could run in parallel; coding only"},
+  {"query": "Research the five main open source feature flag tools, compare them in a spreadsheet, and write a one page recommendation memo for our CTO", "should_trigger": true, "from": "description: documents and business work"},
+  {"query": "I want a weekly terraform drift check across all our aws accounts plus a summary doc for the platform team. I dont think any of my skills cover terraform, so work out what to do about that part", "should_trigger": true, "from": "When to use: part of the task has no installed skill"},
+  {"query": "im building a payment webhook. tdd-guide says write the tests first but senior-backend says prototype the handler first and test after. those two contradict each other, sort it out and get going on the webhook", "should_trigger": true, "from": "When to use: two skills give opposite instructions"},
+  {"query": "Split this up across a few agents if you can: migrate the users table to the new schema, update the API handlers that read it, and write the rollout doc for the ops team", "should_trigger": true, "from": "description: split across multiple agents"},
+  {"query": "summarise the 12 PDFs in contracts/ into a spreadsheet of renewal dates, then draft a letter to each vendor whose contract lapses this year", "should_trigger": true, "from": "When to use: different kinds of work; documents only"},
+  {"query": "review PR 482, fix whatever problems you find, and write up release notes for the customer newsletter", "should_trigger": true, "from": "description: reviews + documents"},
+
+  {"query": "rename this variable", "should_trigger": false, "from": "required; When not to use example"},
+  {"query": "make me one chart", "should_trigger": false, "from": "required; When not to use example"},
+  {"query": "rename the variable usr to user across src/auth/session.py, it's only that one file", "should_trigger": false, "from": "When not to use: one skill or none"},
+  {"query": "here's monthly_signups.csv, make me one bar chart of signups per month, nothing fancy", "should_trigger": false, "from": "When not to use: one skill"},
+  {"query": "the login test in tests/test_auth.py is failing with a KeyError on remember_me. find the bug and fix it", "should_trigger": false, "from": "When to use: a single piece of work in a few steps does not count"},
+  {"query": "write a one page report for my manager about last week's outage, my notes are in outage-notes.md", "should_trigger": false, "from": "near-miss: 'report for my manager' but only one part"},
+  {"query": "reset the high score in my snake game's save file, it's stored in save.json", "should_trigger": false, "from": "near-miss: 'reset score' about something else"},
+  {"query": "convert report.docx to a PDF and keep the page numbers", "should_trigger": false, "from": "near-miss: documents, one skill"},
+  {"query": "which of my installed skills is the best one for making slides? just tell me, don't make anything", "should_trigger": false, "from": "near-miss: asks about skills, no work to orchestrate"},
+  {"query": "build me a new skill that checks commit messages follow our conventional commits format", "should_trigger": false, "from": "near-miss: skill work that belongs to skill-creator"},
+  {"query": "don't use any skills or agents for this, just do it yourself: fix the typo 'recieve' in README.md and the same typo in docs/intro.md", "should_trigger": false, "from": "When not to use: the user asked for a specific way"},
+  {"query": "add a docstring to parse_date in utils/dates.py explaining the timezone handling", "should_trigger": false, "from": "When not to use: none needed"}
+]

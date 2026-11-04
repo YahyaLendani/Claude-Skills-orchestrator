@@ -5,7 +5,8 @@ from helpers import SKILL_DIR, body, frontmatter, read_skill_file, section
 SUPPORT_FILES = ["modes/coding.md", "modes/documents.md", "features/memory.md",
                  "features/conflicts.md", "features/new-skills.md", "features/preview.md",
                  "features/reliability.md", "features/checker.md",
-                 "features/cards.md", "features/trimming.md", "features/board.md"]
+                 "features/cards.md", "features/trimming.md", "features/board.md",
+                 "features/running-agents.md", "features/trust.md"]
 
 
 def text():
@@ -14,7 +15,7 @@ def text():
 
 def test_frontmatter():
     fm = frontmatter("SKILL.md")
-    assert set(fm) == {"name", "description"}
+    assert set(fm) == {"name", "description", "metadata"}
     assert fm["name"] == "skills-orchestrator"
     assert fm["description"].startswith("Use when")
     assert len(fm["description"]) <= 1024
@@ -52,14 +53,16 @@ def test_override_and_reswitch():
 
 def test_errors():
     errors = section(text(), "## When things go wrong")
-    for s in ["retry that agent", "continue without memory", "closest installed match", "project memory only"]:
+    for s in ["one retry of that agent only", "continue without memory", "closest installed match", "project memory only",
+              "Another command being refused"]:
         assert s in errors, s
 
 
-def test_only_markdown_files():
+def test_only_markdown_files_and_the_state_utility():
     for p in SKILL_DIR.rglob("*"):
-        if p.is_file():
-            assert p.suffix == ".md", f"non-markdown file in skill: {p}"
+        if p.is_file() and "__pycache__" not in p.parts:
+            allowed = p.suffix == ".md" or (p.suffix == ".py" and p.parent.name == "scripts")
+            assert allowed, f"unexpected file in skill: {p}"
 
 
 def test_part_needing_no_skill():
@@ -67,7 +70,7 @@ def test_part_needing_no_skill():
 
 
 def test_when_to_split():
-    assert "one after another" in section(text(), "## Flow")
+    assert "one after another" in read_skill_file("features/running-agents.md")
 
 
 def test_unclear_task_asks_one_question():
@@ -99,7 +102,7 @@ def test_evidence_handed_back():
 
 def test_step_9_no_per_agent_counting():  # Final I1
     assert "that agent's result" not in section(text(), "## Flow")
-    assert "once per job" in section(text(), "## Flow")
+    assert "Record the job's skills once" in section(text(), "## Flow")
 
 
 def test_evidence_for_skill_rules():  # Final I4

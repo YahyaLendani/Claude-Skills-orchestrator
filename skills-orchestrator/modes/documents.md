@@ -16,14 +16,18 @@ The task is documents work when one or more of these is true:
 | Kind of work | Preferred skill |
 |---|---|
 | Reports, memos, proposals, letters | docs |
+| Word files (when Word or `.docx` is named) | docx |
+| Google Docs, Sheets or Slides (when Google is named) | google-workspace |
 | Slides and decks | pptx (or a slides artifact type, if available) |
 | Spreadsheets and tables | xlsx |
 | Reading or making PDF files | pdf |
 | Charts and graphs | data visualization (e.g. `dataviz`) |
+| Research across several sources | research (e.g. `deep-research`) |
 
-These names are hints, not requirements. Read the list of skills that are
-actually installed and use the closest installed match for each kind of work.
-If nothing installed comes close, follow `../features/new-skills.md`.
+These names are hints, not requirements. Use the list of skills offered in this
+session, not folders on disk (a folder may be disabled or in the trash), and
+pick the closest match for each kind of work. If nothing offered comes close,
+follow `../features/new-skills.md`.
 
 ## Conflict rule
 

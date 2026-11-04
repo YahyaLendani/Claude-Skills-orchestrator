@@ -7,11 +7,15 @@ answer before any work starts.
 
 Show it only for big jobs:
 
-- the plan uses 2 or more agents, or
+- the plan starts any agent, or
 - a draft or suggested skill is involved.
 
-For anything smaller, skip the preview and just work (after the one-line mode
-notice).
+A job in two modes (`Mode: coding + documents`) always counts, because each
+mode's part gets its own agent (`features/running-agents.md`). Don't move it to the main
+session to avoid the preview.
+
+For anything smaller (one part, done in the main session), skip the preview and
+just work (after the one-line mode notice).
 
 ## Format
 
@@ -24,8 +28,10 @@ Based on: a recipe that worked 3× before
 
 Agent 1 → fix the login bug
   skills: systematic-debugging, test-driven-development
+  runs as: general-purpose · files: src/auth/
 Agent 2 → write a 1-page manager report (waits for Agent 1)
   skills: docs
+  runs as: general-purpose · files: reports/login-bug.docx
 🆕 Draft skill: none
 ⚖️ Conflicts: none
 🧩 Fit: ok
@@ -36,8 +42,9 @@ Reply: yes / edit / cancel
 ```
 
 - **Mode:** the mode line from flow step 2.
-- **Based on:** from memory (`features/memory.md`), or `no earlier recipe`.
+- **Based on:** from memory (`features/memory.md`), or `no earlier recipe`. A recipe from committed project memory says so (`features/trust.md`).
 - **Agent lines:** one per agent: what it does, its skills, and `(waits for Agent N)` when it needs another agent's output. A trimmed skill shows the sections that agent gets, e.g. `skills: pdf (trimmed: Reading PDFs)` (`features/trimming.md`).
+- **runs as / files:** the agent type, and the files or folders it may change (`features/running-agents.md`). Add `(own worktree)` when it gets one; a read-only agent shows `files: none`.
 - **🧩 Fit:** only when an agent waits for another: `🧩 Fit: ok`, or one line per gap asking to fix it (formats in `features/cards.md` "Fit check").
 - **🆕 Draft skill:** the name of any draft skill, or `none`.
 - **🆕 Suggested skill:** add this line only when a skill from outside is suggested:
@@ -50,7 +57,7 @@ Reply: yes / edit / cancel
 - **Rough size:** the agent count (plus `+ checker` when the checker is on) and one word:
   - `small` — 1–2 agents with short tasks;
   - `medium` — 3 agents, or 2 agents with longer tasks;
-  - `large` — 4 or more agents, or long tasks.
+  - `large` — 4 or more agents (6 at most, see `features/running-agents.md`), or long tasks.
   Never give an exact cost: it cannot be known in advance.
 
 ## Replies

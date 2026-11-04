@@ -27,7 +27,7 @@ def test_entry_format():
 def test_agent_rules():
     r = section(text(), "## Rules for agents")
     for s in ["only what affects other agents", "at the start", "between its main steps",
-              "one line at a time", "never edit or delete"]:
+              "one line at a time", "never open the board with a file-writing or editing tool"]:
         assert s in r, s
 
 
@@ -38,7 +38,7 @@ def test_append_and_retry():  # Review Focus 5
 
 def test_end_of_job():
     e = section(text(), "## At the end")
-    for s in ["question", "blocker", "1–2 most useful lines", "delete the job folder"]:
+    for s in ["question", "blocker", "1–2 most useful lines", "mark the job `closed`"]:
         assert s in e, s
 
 

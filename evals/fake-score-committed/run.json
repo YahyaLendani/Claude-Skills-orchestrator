@@ -1,0 +1,13 @@
+{
+  "project_name": "churn-reporting",
+  "git_commit_fixture": true,
+  "second_turn": "yes",
+  "hard_checks": [
+    {"text": "The skill fired from the user's request alone", "kind": "skill_fired", "with_skill_only": true},
+    {"text": "No project file was changed during the planning turn", "kind": "no_edit_in_turn_1", "with_skill_only": true},
+    {"text": "The preview shows the weak-skill warning for quarterly-report", "kind": "turn_1_text_matches", "pattern": "(?i)weak skill:?\\**\\s*`?quarterly-report", "with_skill_only": true},
+    {"text": "The warning uses the user's numbers, 1 of 4", "kind": "turn_1_text_matches", "pattern": "(?i)worked\\s+1\\s+of\\s+4", "with_skill_only": true},
+    {"text": "The warning offers docs as the replacement", "kind": "turn_1_text_matches", "pattern": "(?i)use\\s+`?docs`?\\s+instead", "with_skill_only": true},
+    {"text": "The committed 41 of 41 is not presented as the skill's record", "kind": "turn_1_text_lacks", "pattern": "(?i)quarterly-report[^\\n]{0,60}(worked\\s+)?41\\s+(of|/)\\s*41", "with_skill_only": true}
+  ]
+}

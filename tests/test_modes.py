@@ -35,4 +35,4 @@ def test_mode_lists_spec_clues_and_skills(path):
 
 @pytest.mark.parametrize("path", MODES)
 def test_mode_uses_closest_installed_match(path):
-    assert "closest installed" in read_skill_file(path)
+    assert "closest match" in read_skill_file(path)
