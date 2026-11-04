@@ -19,6 +19,7 @@ These hold even when two sessions run in the same project at the same time.
 | Missing evidence isn't success | A `worked` result with no evidence for that skill is stored as `unverified` | `result append` |
 | No lost score updates | `scores.md` is rebuilt from the baseline + all result records, under the same lock as new results | `scores sync` |
 | No lost memory entries | Read-modify-write under a lock, then atomic replace; an update changes only that entry's result and note | `memory add`, `memory update` |
+| Older state keeps counting | Job, result, baseline and reset files from 1.4 and 1.5 are read as they are, and old result records aren't rewritten; a `worked` from those versions stays `worked`, and a date-only reset excludes results from that whole day | `scores sync`, `validate`, `job` commands |
 | Broken records are reported | Reads only; `validate` exits 1 if a job or result file is broken | `job list`, `validate` |
 | Skill fingerprints | One SHA-256 over every file in the skill folder, ignoring caches | `fingerprint` |
 | No half-written files | Temp file in the target folder, `os.replace`, fsync | all writes |
