@@ -1319,6 +1319,163 @@ class ScoresReset(Base):
         self.assertNotIn("pdf", self.scores(self.state_dir))
 
 
+class OlderState(Base):
+    """Files exactly as the 1.5.0 script wrote them. They're read as they are, never rewritten."""
+
+    JOB = "20261101-100000-aaaaaaaa"
+    OPEN_JOB = "20261102-100000-bbbbbbbb"
+    SCORES = """# Skills Orchestrator scores
+
+```yaml
+- skill: docs
+  worked: 0
+  partly: 0
+  failed: 1
+  last_used: 2026-11-01
+  last_problem: "broke"
+- skill: pdf
+  worked: 3
+  partly: 1
+  failed: 0
+  last_used: 2026-11-01
+  last_problem: "slow"
+```
+"""
+
+    def setUp(self):
+        super().setUp()
+        record = {
+            "job": self.JOB, "project": "somewhere", "created": "2026-11-01T10:00:00Z", "owner": "old",
+            "skills": [
+                {"skill": "pdf", "outcome": "worked", "note": "", "at": "2026-11-01T10:00:00Z"},
+                {"skill": "docs", "outcome": "failed", "note": "broke", "at": "2026-11-01T10:00:00Z"},
+            ],
+        }
+        entries = {"pdf": {"skill": "pdf", "worked": 2, "partly": 1, "failed": 0, "last_used": "2026-10-29", "last_problem": "slow"}}
+        baseline = {"created": "2026-10-30T10:00:00Z", "entries": entries}
+        self.old_files = {}
+        for folder, name, record_path in (
+            (self.state_dir, "baseline-project.json", self.state_dir / "results" / f"{self.JOB}.json"),
+            (self.user_dir, "baseline-user.json", self.user_dir / "results" / "5ed81c765876" / f"{self.JOB}.json"),
+        ):
+            record_path.parent.mkdir(parents=True)
+            self.write(record_path, record)
+            self.write(folder / "results" / name, baseline)
+            (folder / "scores.md").write_text(self.SCORES, encoding="utf-8")
+            self.old_files[record_path] = record_path.read_bytes()
+        self.open_job_file = self.state_dir / "jobs" / self.OPEN_JOB / "job.json"
+        self.open_job_file.parent.mkdir(parents=True)
+        self.write(self.open_job_file, {
+            "id": self.OPEN_JOB, "task": "still open", "agents": 1, "state": "active",
+            "created": "2026-11-02T10:00:00Z", "owner": {"session": "old-session", "pid": 1, "host": "h"},
+        })
+
+    def write(self, path, value):
+        path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
+
+    def test_sync_keeps_the_counts_in_both_files(self):
+        self.ok("scores", "sync")
+        for folder in (self.state_dir, self.user_dir):
+            lines = self.scores(folder)
+            self.assertEqual(lines["pdf"]["worked"], "3")
+            self.assertEqual(lines["pdf"]["partly"], "1")
+            self.assertEqual(lines["pdf"]["last_problem"], "slow")
+            self.assertEqual(lines["docs"]["failed"], "1")
+            self.assertEqual(lines["docs"]["last_problem"], "broke")
+            self.assertEqual(lines["docs"]["last_used"], "2026-11-01")
+
+    def test_an_old_worked_result_stays_worked(self):
+        self.ok("scores", "sync")
+        self.assertEqual(self.scores(self.state_dir)["pdf"]["unverified"], "0")
+
+    def test_new_results_add_to_the_old_counts(self):
+        self.worked("pdf")
+        self.ok("scores", "sync")
+        for folder in (self.state_dir, self.user_dir):
+            self.assertEqual(self.scores(folder)["pdf"]["worked"], "4")
+
+    def test_syncing_twice_changes_nothing(self):
+        self.ok("scores", "sync")
+        first = (self.state_dir / "scores.md").read_bytes()
+        report = self.ok("scores", "sync")
+        self.assertFalse(any(item["changed"] for item in report["files"]))
+        self.assertEqual((self.state_dir / "scores.md").read_bytes(), first)
+
+    def test_old_records_are_not_rewritten_or_copied(self):
+        self.ok("scores", "sync")
+        for path, data in self.old_files.items():
+            self.assertEqual(path.read_bytes(), data)
+        self.assertEqual(len(list(self.user_dir.glob(f"results/*/{self.JOB}.json"))), 1)
+
+    def test_validate_and_job_list_accept_them(self):
+        report = self.ok("validate")
+        self.assertEqual(report["errors"], [])
+        job = next(item for item in self.ok("job", "list")["jobs"] if item["id"] == self.OPEN_JOB)
+        self.assertEqual((job["status"], job["session"]), ("active", "old-session"))
+
+    def test_a_broken_old_record_is_still_reported(self):
+        (self.state_dir / "results" / f"{self.JOB}.json").write_text('{"job": "x"}', encoding="utf-8")
+        self.assertIn("1 problem(s) found", self.refused("validate"))
+
+    def test_an_old_reset_waiting_in_resets_json_is_kept(self):
+        (self.state_dir / "resets.json").write_text('{"pdf": "2026-11-02"}', encoding="utf-8")
+        self.worked("pdf")
+        self.ok("scores", "sync")
+        line = self.scores(self.state_dir)["pdf"]
+        self.assertEqual((line["worked"], line["partly"]), ("1", "0"))
+        self.assertEqual(line["reset_on"], "2026-11-02")
+        self.assertEqual(self.scores(self.user_dir)["pdf"]["worked"], "1")
+
+    def test_a_date_only_reset_excludes_results_from_that_whole_day(self):
+        (self.state_dir / "resets.json").write_text('{"pdf": "2026-11-01"}', encoding="utf-8")
+        self.ok("scores", "sync")
+        self.assertEqual(self.scores(self.state_dir)["pdf"]["worked"], "0")
+
+    def test_a_new_reset_works_on_old_state_and_outlasts_resets_json(self):
+        (self.state_dir / "resets.json").write_text('{"pdf": "2026-11-01"}', encoding="utf-8")
+        self.ok("scores", "reset", "--skill", "docs")
+        self.ok("scores", "sync")
+        self.assertEqual(self.scores(self.state_dir)["docs"]["failed"], "0")
+        self.worked("pdf")
+        self.ok("scores", "reset", "--skill", "pdf")
+        self.ok("scores", "sync")
+        for folder in (self.state_dir, self.user_dir):
+            self.assertEqual(self.scores(folder)["pdf"]["worked"], "0")
+
+    def test_broken_old_files_are_refused_not_ignored(self):
+        path = self.state_dir / "results" / "baseline-project.json"
+        kept = path.read_bytes()
+        path.write_text('{"created": "x", "entries": 3}', encoding="utf-8")
+        self.assertIn("can't be read", self.refused("scores", "sync"))
+        path.write_bytes(kept)
+        (self.state_dir / "resets.json").write_text("[1]", encoding="utf-8")
+        self.assertIn("can't be read", self.refused("scores", "sync"))
+
+    def test_an_open_job_keeps_its_owner(self):
+        self.assertIn("another session", self.refused("job", "close", "--id", self.OPEN_JOB, "--session", "s1"))
+        self.ok("job", "close", "--id", self.OPEN_JOB, "--session", "old-session", "--no-results")
+        job = self.job_json(self.OPEN_JOB)
+        self.assertEqual((job["status"], job["session"]), ("closed", "old-session"))
+        self.assertNotIn("state", job)
+        self.assertNotIn("owner", job)
+
+    def test_an_open_job_can_be_taken_over_and_finished(self):
+        self.ok("job", "recover", "--id", self.OPEN_JOB, "--session", "s1", "--confirm")
+        job = self.job_json(self.OPEN_JOB)
+        self.assertEqual(job["previous_sessions"], ["old-session"])
+        self.append(self.OPEN_JOB, "pdf:worked", extra=["--evidence", "pdf=pytest"])
+        self.ok("job", "close", "--id", self.OPEN_JOB, "--session", "s1")
+        self.ok("scores", "sync")
+        self.assertEqual(self.scores(self.state_dir)["pdf"]["worked"], "4")
+        self.assertEqual(self.ok("validate")["errors"], [])
+
+    def test_gc_reports_an_old_open_job_as_abandoned(self):
+        self.age(self.open_job_file.parent)
+        report = self.ok("job", "gc", "--apply")
+        self.assertEqual(report["abandoned"], [self.OPEN_JOB])
+        self.assertTrue(self.open_job_file.exists())
+
+
 class Fingerprint(Base):
     def expected(self, files):
         outer = hashlib.sha256()

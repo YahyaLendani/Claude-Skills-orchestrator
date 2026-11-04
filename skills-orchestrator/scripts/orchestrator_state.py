@@ -629,6 +629,19 @@ def checked_id(job_id: str) -> str:
     return job_id
 
 
+def upgrade_job(job: dict) -> dict:
+    """A job.json from 1.4 or 1.5 (state, owner, created) in today's fields."""
+    if "status" in job or "state" not in job:
+        return job
+    job = dict(job)
+    job["status"] = job.pop("state")
+    owner = job.pop("owner", None)
+    job["session"] = owner.get("session") if isinstance(owner, dict) else None
+    if "created" in job:
+        job["created_at"] = job.pop("created")
+    return job
+
+
 def load_job(folder: Path, job_id: str) -> dict:
     path = folder / "job.json"
     if not path.is_file():
@@ -641,7 +654,7 @@ def load_job(folder: Path, job_id: str) -> dict:
         raise Refused(f"{path} can't be read")
     if job.get("id") != job_id:
         raise Refused(f"{path} says its id is {job.get('id')!r}, not {job_id!r}")
-    return job
+    return upgrade_job(job)
 
 
 def check_owner(job: dict, session: str) -> None:
@@ -1023,10 +1036,28 @@ def cmd_memory_update(args) -> None:
 # ---------------------------------------------------------------- result records
 
 
+def upgrade_record(record):
+    """A record from 1.4 or 1.5 in today's fields, for reading. The file itself stays as it is.
+
+    Those versions kept no evidence, so what they counted as worked stays worked.
+    """
+    if "job" not in record or "recorded_at" in record:
+        return record
+    return {
+        "job_id": record["job"],
+        "recorded_at": record["created"],
+        "date": str(record["created"])[:10],
+        "skills": [
+            {"skill": item["skill"], "result": item["outcome"], "problem": item.get("note", ""), "from_before_evidence": True}
+            for item in record["skills"]
+        ],
+    }
+
+
 def read_record(path: Path):
     """A valid record with its time, or None. Records are never repaired or deleted here."""
     try:
-        record = json.loads(path.read_bytes().decode("utf-8"))
+        record = upgrade_record(json.loads(path.read_bytes().decode("utf-8")))
         moment = parse_stamp(record["recorded_at"])
         valid = (
             record["job_id"] == path.stem
@@ -1265,7 +1296,7 @@ def build_line(skill: str, base: dict | None, records: list, boundary: str | Non
         if boundary_at is not None and moment <= boundary_at:
             continue
         result = entry["result"]
-        if result == "worked" and not entry.get("evidence"):
+        if result == "worked" and not entry.get("evidence") and not entry.get("from_before_evidence"):
             result = "unverified"
         counts[result] += 1
         if result != "worked":
@@ -1315,6 +1346,17 @@ def render_line(line: dict) -> list[str]:
     return out
 
 
+def upgrade_baseline(baseline: dict) -> dict:
+    """A baseline from 1.4 or 1.5 (entries by skill name) in today's fields."""
+    if "skills" in baseline or "entries" not in baseline:
+        return baseline
+    return {
+        "captured_at": baseline.get("created", ""),
+        "skills": [{**fields, "skill": skill} for skill, fields in baseline["entries"].items()],
+        "resets": {},
+    }
+
+
 class ScoreFile:
     """One scope's scores.md with its baseline and its result records.
 
@@ -1342,12 +1384,26 @@ class ScoreFile:
             self.baseline = {"captured_at": stamp(utc_now()), "skills": self._lines_in_doc(), "resets": {}}
         else:
             try:
-                self.baseline = json.loads(self.baseline_path.read_bytes().decode("utf-8"))
+                self.baseline = upgrade_baseline(json.loads(self.baseline_path.read_bytes().decode("utf-8")))
                 self.baseline["skills"], self.baseline.setdefault("resets", {})
-            except (ValueError, KeyError, TypeError) as error:
+            except (ValueError, KeyError, TypeError, AttributeError) as error:
                 raise Refused(f"{self.baseline_path} can't be read, so the counts can't be rebuilt: {error}")
+        self.baseline["resets"] = {**self._older_resets(), **self.baseline["resets"]}
         self.saved_resets = dict(self.baseline["resets"])
         self.records: list = []
+
+    def _older_resets(self) -> dict:
+        """1.4 and 1.5 kept resets in resets.json, and a reset could wait there for the next sync."""
+        path = self.scope.path / "resets.json"
+        if not path.exists():
+            return {}
+        try:
+            resets = json.loads(path.read_bytes().decode("utf-8"))
+        except ValueError as error:
+            raise Refused(f"{path} can't be read, so the counts can't be rebuilt: {error}")
+        if not isinstance(resets, dict):
+            raise Refused(f"{path} can't be read, so the counts can't be rebuilt")
+        return resets
 
     def _lines_in_doc(self) -> list[dict]:
         lines: list[dict] = []
