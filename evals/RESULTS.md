@@ -45,6 +45,18 @@ To finish after the limit resets, keeping the valid runs:
 python evals/run_triggers.py --arm real --label after-shift --retry-invalid
 ```
 
+## Checks on the 1.6.0 description and layout
+
+Run 2026-11-04 on the PR branch at `9dd0b4b`, after the angle brackets left the description (`01e86dae8edf`). The two trigger result files above use the old description.
+
+**Required queries: 4 of 4 pass, $0.81.** This is the `isolated` arm, with 3 runs per query: both fire queries fired 3 of 3, and both silent queries fired 0 of 3. It's a different setup from the `real` arm, so don't compare rates across them. Raw results are in `triggers/results-isolated-required-1.6.0.json`.
+
+**One real job with the plugin, $2.91 for two runs.** The plugin came from `git archive`, in a throwaway project and home folder, and each run started with `/orchestrate`, so neither tests firing.
+
+- **First run:** preview, both agents and the checker ran, and the checker caught a real overstatement in the report. Nothing was saved. The run's permission rules refused a shell command, and the skill then assumed the state utility was unavailable without trying it. `SKILL.md` now says to try the utility first; that wording hasn't been run.
+- **Second run:** with wider rules and a system-prompt hint to keep trying commands, the job finished. The startup hook fired, and the state utility ran from `skills-orchestrator/scripts/`. Result records, scores and memory were saved in the project and home folders, the job closed, `validate` found no errors, and the project's tests passed. The real user state and installed skill didn't change.
+- **Not covered:** board posts and card saving (refused by the run's rules), an agent saving its own file, the checker re-running a "fails before the fix" step, and the fix round.
+
 ## Blind trap cases
 
 Iteration 1, skill snapshot fingerprint `4f5cefd091ef`. In every run, the blind check passed and the real user state stayed unchanged. Raw output is in `../skills-orchestrator-workspace/iteration-1/`.

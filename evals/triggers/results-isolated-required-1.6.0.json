@@ -1,0 +1,122 @@
+{
+  "label": "required-1.6.0",
+  "arm": "isolated",
+  "model": "claude-opus-5-5",
+  "description": "Use when a task needs two or more skills, or has separate parts that could be split across multiple agents — for coding work (bugs, features, tests, reviews), documents and business work (reports, slides, spreadsheets, PDFs, research), or a mix of both, such as \"fix this bug and write a report for my manager\". Also use when no installed skill fits part of a task, when two skills give conflicting instructions, or when the user says \"reset score for\" a skill, such as \"reset score for pdf\".",
+  "description_sha": "01e86dae8edf",
+  "date": "2026-11-04 19:38",
+  "runs_per_query": 3,
+  "threshold": 0.5,
+  "stub_skills_listed": 68,
+  "summary": {
+    "complete": true,
+    "incomplete_queries": 0,
+    "passed": 4,
+    "total": 4,
+    "should_trigger_passed": 2,
+    "should_trigger_total": 2,
+    "should_not_trigger_passed": 2,
+    "should_not_trigger_total": 2,
+    "errored_runs": 0,
+    "cost_usd_seen": 0.81,
+    "duration_seconds": 38
+  },
+  "results": [
+    {
+      "query": "fix this bug and write a report for my manager",
+      "should_trigger": true,
+      "from": "required; description example",
+      "triggers": 3,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 1.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ]
+      ],
+      "sample_final": ""
+    },
+    {
+      "query": "reset score for pdf",
+      "should_trigger": true,
+      "from": "required; description, reset command",
+      "triggers": 3,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 1.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ]
+      ],
+      "sample_final": ""
+    },
+    {
+      "query": "rename this variable",
+      "should_trigger": false,
+      "from": "required; When not to use example",
+      "triggers": 0,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 0.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [],
+        [
+          "Glob"
+        ],
+        []
+      ],
+      "sample_final": "Which variable do you want renamed, and what should the new name be? I can't see a selection or open file from here, so please send:\n\n- the file (and line, if you have it)\n- the current name\n- the new name\n\nI'll update every reference to it in that file. If it's used in other files, I'll update thos"
+    },
+    {
+      "query": "make me one chart",
+      "should_trigger": false,
+      "from": "required; When not to use example",
+      "triggers": 0,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 0.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "PowerShell"
+        ],
+        [
+          "PowerShell"
+        ],
+        [
+          "PowerShell"
+        ]
+      ],
+      "sample_final": "I can make it, but I need to know what to chart. Your working folder is empty, so I don't have any data to start from.\n\nCould you tell me:\n\n1. **What data?** Paste some numbers, point me to a CSV or Excel file, or name a topic I could look up.\n2. **What should it show?** For example, a trend over ti"
+    }
+  ]
+}

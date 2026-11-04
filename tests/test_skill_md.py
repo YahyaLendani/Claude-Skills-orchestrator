@@ -53,7 +53,8 @@ def test_override_and_reswitch():
 
 def test_errors():
     errors = section(text(), "## When things go wrong")
-    for s in ["one retry of that agent only", "continue without memory", "closest installed match", "project memory only"]:
+    for s in ["one retry of that agent only", "continue without memory", "closest installed match", "project memory only",
+              "Another command being refused"]:
         assert s in errors, s
 
 
