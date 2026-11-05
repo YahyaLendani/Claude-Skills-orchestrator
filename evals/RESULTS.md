@@ -57,6 +57,30 @@ Run 2026-11-04 on the PR branch at `9dd0b4b`, after the angle brackets left the 
 - **Second run:** with wider rules and a system-prompt hint to keep trying commands, the job finished. The startup hook fired, and the state utility ran from `skills-orchestrator/scripts/`. Result records, scores and memory were saved in the project and home folders, the job closed, `validate` found no errors, and the project's tests passed. The real user state and installed skill didn't change.
 - **Not covered:** board posts and card saving (refused by the run's rules), an agent saving its own file, the checker re-running a "fails before the fix" step, and the fix round.
 
+## A second real job, from the v1.6.0 tag
+
+Run 2026-11-05 with the plugin from the `v1.6.0` tag, in a throwaway project and home folder that already held state from the real 1.5.0 script: 4 result records, a memory entry and an open job 8 days old. It started with `/orchestrate`, and this time had no hint about commands.
+
+**Cost: $5.38, of which $4.92 was the job.** The other $0.46 was a first attempt that my test script stopped at the preview. The script also stopped before the save step, so that part ran by resuming the session, for $1.69 of the $4.92.
+
+**What worked:**
+
+- **Fix round:** the checker caught a false claim in the report. Agent 2 corrected it, and the checker re-checked and passed it.
+- **Upgraded state:** `docs` went from 1 to 2 worked and `systematic-debugging` from 2 to 3, in the project and home files. The preview used the old memory entry, the new one reached both memory files, `validate` found no errors, and none of the 8 old record files changed.
+- **Old open job:** `job gc` reported it as abandoned, and the skill left it alone and asked before changing it.
+- **Trying the utility:** four actions were refused before the job's first utility commands that write state, and the skill still ran them. They all worked.
+- **An agent's own edit:** Agent 1 edited `pricing.py` itself.
+
+**What it found:** the main session's summary to the checker left out the sentence where Agent 1 made the false claim, so the checker blamed the `docs` skill. The skill noticed and asked how to score it. An incomplete summary also caused a false alarm in the earlier job, so `features/checker.md` now asks for each handback word for word. No run has used that wording yet.
+
+**Still not covered:**
+
+- **Board posts and card saving:** refused by this test's rules, which don't allow writes under `.claude`.
+- **The checker re-running old code:** its commands didn't fit the test's allowed list. It relied on Agent 1's earlier output and said so.
+- **An agent saving a report:** Claude Code told Agent 2 that subagents should return reports as text, so the main session saved its text unchanged.
+
+A run with permissions bypassed was refused by a safety check, so this one kept a fixed list of allowed commands. This is one run, so it doesn't show how steady any of this is.
+
 ## Blind trap cases
 
 Iteration 1, skill snapshot fingerprint `4f5cefd091ef`. In every run, the blind check passed and the real user state stayed unchanged. Raw output is in `../skills-orchestrator-workspace/iteration-1/`.

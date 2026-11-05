@@ -26,6 +26,11 @@ def test_checker_off():  # Review Focus 5
     assert "🔍 Checker: off" in w and "the signs" in w
 
 
+def test_inputs_keep_the_handback_word_for_word():
+    i = section(text(), "## Inputs")
+    assert "word for word" in i and "Don't summarize it" in i
+
+
 def test_inputs_exclude_chat_and_secrets():
     i = section(text(), "## Inputs")
     assert "not the full chat" in i and "passwords or keys" in i
