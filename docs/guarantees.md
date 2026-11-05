@@ -28,6 +28,8 @@ These hold even when two sessions run in the same project at the same time.
 
 ## Still instructions
 
+A score committed with a repository can still win a tie: the rule against it is on `features/reliability.md`, but a test followed it in only 1 of 6 runs (`evals/RESULTS.md`).
+
 These depend on the model following the markdown, and are not guarantees on
 their own.
 

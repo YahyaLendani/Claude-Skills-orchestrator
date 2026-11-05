@@ -81,6 +81,53 @@ Run 2026-11-05 with the plugin from the `v1.6.0` tag, in a throwaway project and
 
 A run with permissions bypassed was refused by a safety check, so this one kept a fixed list of allowed commands. This is one run, so it doesn't show how steady any of this is.
 
+## Final checks for 1.6.1
+
+Run 2026-11-05. The new write commands and the tie rule below are only in 1.6.1.
+
+### What reaches people
+
+`plugin update` goes by version number alone. In a throwaway install updating against GitHub, 1.5.0 moved up to the latest files, but a copy on 1.6.0 stayed on its old files and reported "already at the latest version", whichever 1.6.0 commit it held. So a change with no version bump reaches nobody who already installed. That's why this is 1.6.1. The older releases were put in place by hand, because the test can't install them from GitHub. Adding the marketplace and installing from GitHub also worked. The install copies the whole repository, including `evals/`, `tests/` and `docs/`.
+
+### Writes under `.claude`
+
+A cheap Haiku probe ($0.007) showed `printf >>` and the Write tool are refused under `.claude`, even with allow rules, while the same write through Python passes. Board posts, cards, trimmed copies and drafts now go through the state utility.
+
+### A third real job
+
+Same setup as the job above, on the 1.6.1 branch, with no write rules for `.claude`. A 10-minute test timeout killed it during the checker's turn, so the session was resumed to finish. The two recorded turns cost $0.40 and $1.31; the killed turn's cost wasn't recorded.
+
+- **Worked for the first time in a model run:** `card save` with a heredoc, `board post` from a sub-agent, and the checker running the tests on the old code (1 failed) and the new code (both passed).
+- **Checker's briefing:** the main session labelled each handback "word for word". Agent 1's arrived whole, apart from two lines the harness adds. For Agent 2's, the report text was replaced by a pointer to `report.md`, which held that text. The checker confirmed the report's claims and raised no false alarm. That's one run, so it doesn't show the false alarms have stopped.
+- **Saved state:** scores in both files, the memory entry, the result record and closing the job all worked, `validate` found no errors, and the real state and installed skill didn't change.
+- **Not covered:** `trimmed save` and `draft save` have unit tests only, and `card save --scope user` wasn't used because both skills were in the project.
+
+### A score committed with the repo can still win a tie
+
+**This isn't fixed.** The test has two identical skills, and a score file committed with the project saying one worked 41 of 41 times. The user has no scores.
+
+| Wording | Runs that picked the skill with the fake score |
+|---|---|
+| Before the rule | 2 of 2 |
+| Rule in `features/reliability.md` | 1 of 2 |
+| Rule also in `SKILL.md`, at the step that picks skills | 4 of 4 |
+
+The rule was followed in 1 of 6 runs. Runs that used the score mostly said it came with the repo, then used it anyway, and some added that the choice changed nothing because the skills are identical. Repeating the rule didn't help, so the `SKILL.md` wording was taken back out. The rule stays on the reliability page and `docs/guarantees.md` lists it as an instruction. The risk is limited: it only decides between two installed skills that fit equally well. The test skills are unusually easy to treat as interchangeable, so real skills may behave differently.
+
+### Firing
+
+A full run on the current description (`01e86dae8edf`), in `triggers/results-real-final-1.6.1.json`. 71 of 72 runs are valid, and 1 timed out.
+
+- **Stay silent:** 0 of 35 runs fired, including the 8 queries the earlier rerun couldn't reach. 11 of 12 queries pass, and the 12th has only 2 valid runs, both silent.
+- **Should fire:** 30 of 36 runs fired, and 10 of 12 queries pass. The same two queries that were unsteady before fail again: the 12 PDFs query (1 of 3) and the PR 482 query (0 of 3). These runs use an empty folder, which may affect both.
+- **The description wasn't changed.** Three runs per query is too few to tune it safely.
+
+### Linux and older state
+
+On Linux (WSL, Python 3.14), the 1.6.1 branch passes 409 tests with 2 skipped, including the test that a linked folder can't send a card outside the state folder. On Windows that test is skipped without link rights. State from the real 1.4.0, 1.4.1 and 1.5.0 scripts works on both systems: counts are kept, new results add to them, and no old records changed.
+
+**Still not run:** a real model job on Linux, because Claude Code isn't installed in WSL, and a job on an installed copy of the skill. The blind trap results below were not re-run, so their verdict still stands.
+
 ## Blind trap cases
 
 Iteration 1, skill snapshot fingerprint `4f5cefd091ef`. In every run, the blind check passed and the real user state stayed unchanged. Raw output is in `../skills-orchestrator-workspace/iteration-1/`.

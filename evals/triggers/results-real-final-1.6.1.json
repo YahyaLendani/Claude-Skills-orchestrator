@@ -1,0 +1,696 @@
+{
+  "label": "final-1.6.1",
+  "arm": "real",
+  "model": "claude-opus-5-5",
+  "description": "Use when a task needs two or more skills, or has separate parts that could be split across multiple agents — for coding work (bugs, features, tests, reviews), documents and business work (reports, slides, spreadsheets, PDFs, research), or a mix of both, such as \"fix this bug and write a report for my manager\". Also use when no installed skill fits part of a task, when two skills give conflicting instructions, or when the user says \"reset score for\" a skill, such as \"reset score for pdf\".",
+  "description_sha": "01e86dae8edf",
+  "date": "2026-11-05 13:02",
+  "runs_per_query": 3,
+  "threshold": 0.5,
+  "stub_skills_listed": null,
+  "summary": {
+    "complete": false,
+    "incomplete_queries": 1,
+    "passed": 21,
+    "total": 24,
+    "should_trigger_passed": 10,
+    "should_trigger_total": 12,
+    "should_not_trigger_passed": 11,
+    "should_not_trigger_total": 12,
+    "errored_runs": 1,
+    "cost_usd_seen": 7.44,
+    "duration_seconds": 361
+  },
+  "results": [
+    {
+      "query": "fix this bug and write a report for my manager",
+      "should_trigger": true,
+      "from": "required; description example",
+      "triggers": 3,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 1.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ]
+      ],
+      "sample_final": ""
+    },
+    {
+      "query": "reset score for pdf",
+      "should_trigger": true,
+      "from": "required; description, reset command",
+      "triggers": 3,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 1.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ]
+      ],
+      "sample_final": ""
+    },
+    {
+      "query": "reset the score for code-reviewer, i rewrote that skill yesterday so the old numbers dont mean anything",
+      "should_trigger": true,
+      "from": "description, reset command, loose wording",
+      "triggers": 3,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 1.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ]
+      ],
+      "sample_final": ""
+    },
+    {
+      "query": "the checkout page throws a 500 when the cart is empty. track it down, fix it, add a regression test, and then make me a 3 slide deck for friday's exec review explaining what happened",
+      "should_trigger": true,
+      "from": "When to use: two or more skills; coding + documents",
+      "triggers": 3,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 1.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ]
+      ],
+      "sample_final": ""
+    },
+    {
+      "query": "Go through Q3_sales.xlsx in my downloads, remove the duplicate rows, chart revenue by region, and turn the whole thing into a two page PDF for the board",
+      "should_trigger": true,
+      "from": "When to use: two or more skills; documents only",
+      "triggers": 3,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 1.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ]
+      ],
+      "sample_final": ""
+    },
+    {
+      "query": "we need dark mode on the settings page, unit tests for the toggle, and a security review of the new preferences endpoint before it ships. those could probably all run at the same time",
+      "should_trigger": true,
+      "from": "When to use: separate parts that could run in parallel; coding only",
+      "triggers": 2,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 0.67,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ],
+        [
+          "PowerShell",
+          "Glob"
+        ]
+      ],
+      "sample_final": "I couldn't start any of the three tasks because there's no code here. The working directory (`C:\\Users\\yahya\\AppData\\Local\\Temp\\trigger-tbj331x_\\work-_fplwthw`) is empty and isn't a git repository, so there's no settings page, toggle or preferences endpoint to work on. My first attempt to list the f"
+    },
+    {
+      "query": "Research the five main open source feature flag tools, compare them in a spreadsheet, and write a one page recommendation memo for our CTO",
+      "should_trigger": true,
+      "from": "description: documents and business work",
+      "triggers": 3,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 1.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ]
+      ],
+      "sample_final": ""
+    },
+    {
+      "query": "I want a weekly terraform drift check across all our aws accounts plus a summary doc for the platform team. I dont think any of my skills cover terraform, so work out what to do about that part",
+      "should_trigger": true,
+      "from": "When to use: part of the task has no installed skill",
+      "triggers": 3,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 1.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ]
+      ],
+      "sample_final": ""
+    },
+    {
+      "query": "im building a payment webhook. tdd-guide says write the tests first but senior-backend says prototype the handler first and test after. those two contradict each other, sort it out and get going on the webhook",
+      "should_trigger": true,
+      "from": "When to use: two skills give opposite instructions",
+      "triggers": 3,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 1.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ]
+      ],
+      "sample_final": ""
+    },
+    {
+      "query": "Split this up across a few agents if you can: migrate the users table to the new schema, update the API handlers that read it, and write the rollout doc for the ops team",
+      "should_trigger": true,
+      "from": "description: split across multiple agents",
+      "triggers": 3,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 1.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ],
+        [
+          "Skill"
+        ]
+      ],
+      "sample_final": ""
+    },
+    {
+      "query": "summarise the 12 PDFs in contracts/ into a spreadsheet of renewal dates, then draft a letter to each vendor whose contract lapses this year",
+      "should_trigger": true,
+      "from": "When to use: different kinds of work; documents only",
+      "triggers": 1,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 0.33,
+      "pass": false,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "Glob",
+          "Skill"
+        ],
+        [
+          "Glob",
+          "PowerShell",
+          "PowerShell"
+        ],
+        [
+          "Glob",
+          "PowerShell",
+          "PowerShell"
+        ]
+      ],
+      "sample_final": "I couldn't do any of this because there are no contracts to work from. The `contracts/` folder doesn't exist in the working directory (`C:\\Users\\yahya\\AppData\\Local\\Temp\\trigger-tbj331x_\\work-aw76kskf`), and the directory is completely empty, with no PDFs anywhere in it.\n\nI also tried searching your"
+    },
+    {
+      "query": "review PR 482, fix whatever problems you find, and write up release notes for the customer newsletter",
+      "should_trigger": true,
+      "from": "description: reviews + documents",
+      "triggers": 0,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 0.0,
+      "pass": false,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "PowerShell",
+          "Glob"
+        ],
+        [
+          "PowerShell",
+          "Glob"
+        ],
+        [
+          "PowerShell",
+          "Glob"
+        ]
+      ],
+      "sample_final": "I couldn't do any of the three parts (review, fixes, release notes) because I can't see PR 482 from this session.\n\n- **The working folder is empty.** It contains no files and isn't a git repository, so there's no code here to review or fix.\n- **I can't look the PR up on GitHub.** That needs the `gh`"
+    },
+    {
+      "query": "rename this variable",
+      "should_trigger": false,
+      "from": "required; When not to use example",
+      "triggers": 0,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 0.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "Glob"
+        ],
+        [
+          "Glob"
+        ],
+        [
+          "Glob"
+        ]
+      ],
+      "sample_final": "I can't tell which variable you mean. The working directory is empty, and I can't see any selection or open file from here.\n\nPlease tell me:\n1. **The file**, as a path or by pasting the code.\n2. **The variable's current name.**\n3. **The new name.** If you'd like me to suggest one, tell me what the v"
+    },
+    {
+      "query": "make me one chart",
+      "should_trigger": false,
+      "from": "required; When not to use example",
+      "triggers": 0,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 0.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [
+        "dataviz"
+      ],
+      "first_tools": [
+        [
+          "PowerShell",
+          "Skill",
+          "Read"
+        ],
+        [
+          "Glob",
+          "Skill",
+          "Read"
+        ],
+        [
+          "Glob",
+          "Skill",
+          "Read"
+        ]
+      ],
+      "sample_final": "I couldn't save the chart. Writing `chart.html` to your working folder needs permission, and this session can't show approval prompts, so the write was denied automatically. The folder was also empty, with no data to plot, so I used made-up sample data. Here's a text version:\n\n**Monthly active users"
+    },
+    {
+      "query": "rename the variable usr to user across src/auth/session.py, it's only that one file",
+      "should_trigger": false,
+      "from": "When not to use: one skill or none",
+      "triggers": 0,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 0.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "Grep",
+          "Grep",
+          "Glob"
+        ],
+        [
+          "Read",
+          "Glob",
+          "Glob"
+        ],
+        [
+          "Read",
+          "Glob",
+          "Glob"
+        ]
+      ],
+      "sample_final": "I didn't rename anything because `src/auth/session.py` doesn't exist here. The working directory (`C:\\Users\\yahya\\AppData\\Local\\Temp\\trigger-tbj331x_\\work-kg_gmjrv`) is completely empty: I searched it for any file at all and for anything named `session*.py`, and both came back with nothing.\n\nThe fil"
+    },
+    {
+      "query": "here's monthly_signups.csv, make me one bar chart of signups per month, nothing fancy",
+      "should_trigger": false,
+      "from": "When not to use: one skill",
+      "triggers": 0,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 0.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [
+        "dataviz"
+      ],
+      "first_tools": [
+        [
+          "Skill",
+          "Glob",
+          "PowerShell"
+        ],
+        [
+          "Skill",
+          "Glob",
+          "PowerShell"
+        ],
+        [
+          "Skill",
+          "Glob",
+          "PowerShell"
+        ]
+      ],
+      "sample_final": "I couldn't make the chart because `monthly_signups.csv` never reached me. The file wasn't attached to your message, and the working folder (`C:\\Users\\yahya\\AppData\\Local\\Temp\\trigger-tbj331x_\\work-ykeg0dmo`) is empty.\n\nI also tried to look for it in your Downloads, Desktop and Documents folders. Bot"
+    },
+    {
+      "query": "the login test in tests/test_auth.py is failing with a KeyError on remember_me. find the bug and fix it",
+      "should_trigger": false,
+      "from": "When to use: a single piece of work in a few steps does not count",
+      "triggers": 0,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 0.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "Grep",
+          "Glob",
+          "Bash"
+        ],
+        [
+          "Grep",
+          "Glob",
+          "Bash"
+        ],
+        [
+          "Grep",
+          "Glob",
+          "PowerShell"
+        ]
+      ],
+      "sample_final": "I couldn't find the test, so I haven't changed anything.\n\nThe working directory (`C:\\Users\\yahya\\AppData\\Local\\Temp\\trigger-tbj331x_\\work-d3jvwa4g`) is empty. It has no `tests/` folder, no `.py` files, and the string `remember_me` doesn't appear anywhere in it. It also isn't a git repository, so the"
+    },
+    {
+      "query": "write a one page report for my manager about last week's outage, my notes are in outage-notes.md",
+      "should_trigger": false,
+      "from": "near-miss: 'report for my manager' but only one part",
+      "triggers": 0,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 0.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [
+        "anthropic-skills:docs"
+      ],
+      "first_tools": [
+        [
+          "Skill",
+          "mcp__claude_ai_Claude_Docs__batch",
+          "Read"
+        ],
+        [
+          "Skill",
+          "mcp__claude_ai_Claude_Docs__batch",
+          "Read"
+        ],
+        [
+          "Skill",
+          "mcp__claude_ai_Claude_Docs__batch",
+          "Read"
+        ]
+      ],
+      "sample_final": "I couldn't write the report. Two things got in the way:\n\n1. **I couldn't find your notes.** There's no `outage-notes.md` in the working folder (`C:\\Users\\yahya\\AppData\\Local\\Temp\\trigger-tbj331x_\\work-juyuq5dp`), which is empty. I tried to search your Desktop, Documents and Downloads, but that neede"
+    },
+    {
+      "query": "reset the high score in my snake game's save file, it's stored in save.json",
+      "should_trigger": false,
+      "from": "near-miss: 'reset score' about something else",
+      "triggers": 0,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 0.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "Glob",
+          "PowerShell",
+          "PowerShell"
+        ],
+        [
+          "Glob",
+          "PowerShell",
+          "PowerShell"
+        ],
+        [
+          "Glob",
+          "PowerShell",
+          "PowerShell"
+        ]
+      ],
+      "sample_final": "I couldn't reset the high score because I couldn't find `save.json`.\n\n- **Working directory:** `C:\\Users\\yahya\\AppData\\Local\\Temp\\trigger-tbj331x_\\work-_9kl9xrt` is empty. There's no `save.json` and no snake game files in it.\n- **Wider search:** I tried to search your user profile for `save.json`, b"
+    },
+    {
+      "query": "convert report.docx to a PDF and keep the page numbers",
+      "should_trigger": false,
+      "from": "near-miss: documents, one skill",
+      "triggers": 0,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 0.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [
+        "anthropic-skills:docx"
+      ],
+      "first_tools": [
+        [
+          "Skill",
+          "Glob",
+          "PowerShell"
+        ],
+        [
+          "Skill",
+          "Glob",
+          "PowerShell"
+        ],
+        [
+          "Skill",
+          "Glob",
+          "PowerShell"
+        ]
+      ],
+      "sample_final": "I couldn't convert anything because there's no `report.docx` in the working folder (`C:\\Users\\yahya\\AppData\\Local\\Temp\\trigger-tbj331x_\\work-zituz_s8`). A search of that folder and its subfolders found no `.docx` files at all.\n\nI also tried to look for the file elsewhere, but both attempts were bloc"
+    },
+    {
+      "query": "which of my installed skills is the best one for making slides? just tell me, don't make anything",
+      "should_trigger": false,
+      "from": "near-miss: asks about skills, no work to orchestrate",
+      "triggers": 0,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 0.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [],
+        [],
+        []
+      ],
+      "sample_final": "Use **`anthropic-skills:pptx`**. You don't have a dedicated slides skill installed, so this is the one for building decks, and it saves them as PowerPoint (.pptx) files.\n\nA couple of others are worth knowing about:\n- **`anthropic-skills:google-workspace`** is the better choice if you want the deck i"
+    },
+    {
+      "query": "build me a new skill that checks commit messages follow our conventional commits format",
+      "should_trigger": false,
+      "from": "near-miss: skill work that belongs to skill-creator",
+      "triggers": 0,
+      "runs": 3,
+      "valid_runs": 2,
+      "trigger_rate": 0.0,
+      "pass": null,
+      "errored_runs": 1,
+      "errors": [
+        "timed out"
+      ],
+      "other_skills": [
+        "anthropic-skills:skill-creator"
+      ],
+      "first_tools": [
+        [
+          "Skill",
+          "Glob",
+          "Bash"
+        ],
+        [
+          "Skill",
+          "Glob",
+          "Bash"
+        ]
+      ],
+      "sample_final": "I couldn't create any files. This session has no way to approve permission prompts, so every action that needed approval was refused:\n\n- **Writing files** in the working directory, so I couldn't create the skill folder.\n- **Reading `~/.claude/skills/`**, so I couldn't check whether a skill with this"
+    },
+    {
+      "query": "don't use any skills or agents for this, just do it yourself: fix the typo 'recieve' in README.md and the same typo in docs/intro.md",
+      "should_trigger": false,
+      "from": "When not to use: the user asked for a specific way",
+      "triggers": 0,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 0.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "Grep",
+          "Glob",
+          "PowerShell"
+        ],
+        [
+          "Grep",
+          "Glob",
+          "PowerShell"
+        ],
+        [
+          "Grep",
+          "Glob",
+          "PowerShell"
+        ]
+      ],
+      "sample_final": "I didn't change anything, because neither file exists. The working directory (`C:\\Users\\yahya\\AppData\\Local\\Temp\\trigger-tbj331x_\\work-fpnlcjrm`) is completely empty. There's no `README.md`, no `docs/` folder, and no other files, including hidden ones, so there's nowhere for \"recieve\" to appear.\n\nAr"
+    },
+    {
+      "query": "add a docstring to parse_date in utils/dates.py explaining the timezone handling",
+      "should_trigger": false,
+      "from": "When not to use: none needed",
+      "triggers": 0,
+      "runs": 3,
+      "valid_runs": 3,
+      "trigger_rate": 0.0,
+      "pass": true,
+      "errored_runs": 0,
+      "errors": [],
+      "other_skills": [],
+      "first_tools": [
+        [
+          "Read",
+          "Grep",
+          "Glob"
+        ],
+        [
+          "Read",
+          "Grep",
+          "Glob"
+        ],
+        [
+          "Read",
+          "Grep",
+          "Glob"
+        ]
+      ],
+      "sample_final": "I couldn't add the docstring because `utils/dates.py` isn't here. The working directory (`C:\\Users\\yahya\\AppData\\Local\\Temp\\trigger-tbj331x_\\work-45senm67`) is empty: it has no files at all, and a search found no `parse_date` anywhere in it.\n\nIt looks like this session started in a temporary folder "
+    }
+  ]
+}
