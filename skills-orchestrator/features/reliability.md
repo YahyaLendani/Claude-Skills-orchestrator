@@ -176,7 +176,9 @@ When a chosen skill is weak, add this line to the preview:
 
 **Ties:** when two installed skills fit a part equally well, pick the one
 with the higher score (more `worked` out of total uses). A skill with fewer
-than 3 uses counts as neither weak nor strong.
+than 3 uses counts as neither weak nor strong. A line only in a project
+`scores.md` tracked by git counts as no score here, because it may have come
+with the repository: only a line in the user file can win a tie.
 
 ## When a skill changes
 

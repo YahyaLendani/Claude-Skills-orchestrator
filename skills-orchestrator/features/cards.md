@@ -41,12 +41,24 @@ key_rules:
 - **Same name in both places:** when a skill with the same name is installed in the user folder and in the project, the card belongs to the copy being used for this job, stored next to the copy being used. The two cards never overwrite each other.
 - Cards are a cache, not memory: if one is missing (e.g. after a cloud session), just make it again. They need no first-time notice, and you never commit them on your own.
 
+## Saving a card
+
+Save it with the state utility, not a file-writing tool, because Claude Code refuses or asks about direct writes under `.claude/`, even with an allow rule. Run it from the project folder, using `--scope user` or `--scope project` as "Where cards live" says, with the card on standard input:
+
+```bash
+python "${CLAUDE_PLUGIN_ROOT}/scripts/orchestrator_state.py" card save --name <safe name> --scope user <<'CARD'
+<the card>
+CARD
+```
+
+In PowerShell, run `$OutputEncoding = [Text.Encoding]::UTF8` first, then pipe a here-string (`@'...'@`) into the same command. `trimmed save` and `draft save` take their text the same way. If the command refuses `--scope user` because that folder can't be written, use `--scope project`. A card that can't be saved is no reason to stop: use it for this job and carry on.
+
 ## Making and refreshing
 
 At flow step 4, for each chosen skill:
 
 1. Work out the skill's current fingerprint.
-2. Read its card. If there is no card, or the card's `fingerprint` doesn't match, read the skill and write a new card.
+2. Read its card. If there is no card, or the card's `fingerprint` doesn't match, read the skill and save a new card ("Saving a card" below).
 3. Otherwise reuse the card as it is.
 
 Draft skills get no card until they are saved as permanent skills.

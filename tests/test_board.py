@@ -31,6 +31,14 @@ def test_agent_rules():
         assert s in r, s
 
 
+def test_agents_post_through_the_utility():
+    r = section(text(), "## Rules for agents")
+    assert "board post --id <job> --agent 2 --kind finding" in r
+    assert "printf" not in r and "Add-Content" not in r
+    fallback = section(text(), "## Without the state utility")
+    assert "printf" in fallback and "Add-Content" in fallback
+
+
 def test_append_and_retry():  # Review Focus 5
     t = text()
     assert "append" in t and "retry once" in t

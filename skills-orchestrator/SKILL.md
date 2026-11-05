@@ -2,7 +2,7 @@
 name: skills-orchestrator
 description: Use when a task needs two or more skills, or has separate parts that could be split across multiple agents — for coding work (bugs, features, tests, reviews), documents and business work (reports, slides, spreadsheets, PDFs, research), or a mix of both, such as "fix this bug and write a report for my manager". Also use when no installed skill fits part of a task, when two skills give conflicting instructions, or when the user says "reset score for" a skill, such as "reset score for pdf".
 metadata:
-  version: 1.6.0
+  version: 1.6.1
 ---
 
 # Skills Orchestrator

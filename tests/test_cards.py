@@ -3,6 +3,11 @@ import re
 import yaml
 from helpers import read_skill_file, section
 
+def test_cards_are_saved_through_the_utility():
+    s = section(read_skill_file("features/cards.md"), "## Saving a card")
+    assert "card save --name <safe name> --scope user" in s and "standard input" in s
+
+
 PATH = "features/cards.md"
 KEYS = {"skill", "fingerprint", "made", "lines", "needs", "produces", "parts", "key_rules"}
 
@@ -52,7 +57,7 @@ def test_cards_are_a_cache():
 
 def test_refresh_on_fingerprint_change():
     m = section(text(), "## Making and refreshing")
-    assert "fingerprint" in m and "write a new card" in m
+    assert "fingerprint" in m and "save a new card" in m
 
 
 def test_drafts_have_no_card():

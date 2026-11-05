@@ -57,6 +57,11 @@ def test_replacement_not_weak():  # Review Focus 2
     assert "never suggest a weak skill" in text()
 
 
+def test_a_committed_line_cant_win_a_tie():
+    t = " ".join(read_skill_file("features/reliability.md").split())
+    assert "only a line in the user file can win a tie" in t
+
+
 def test_ties_go_to_higher_score():
     assert "higher score" in text()
 

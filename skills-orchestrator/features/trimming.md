@@ -45,7 +45,9 @@ with that agent's own sections.
 
 ## Making the trimmed copy
 
-Write it to `jobs/<id>/trimmed/<safe name>-agent<n>.md` in the job folder (see
+Save it with `... trimmed save --id <id> --session <session> --name <safe name>-agent<n>`,
+with the text on standard input as in `features/cards.md` "Saving a card". It lands in
+`jobs/<id>/trimmed/<safe name>-agent<n>.md` in the job folder (see
 `features/board.md` "When there is a board" for the job folder, and
 `features/cards.md` "Card format" for the safe name). It contains,
 in this order:
