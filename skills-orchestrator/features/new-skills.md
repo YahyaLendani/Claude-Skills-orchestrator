@@ -20,7 +20,7 @@ If no search tool is available, or nothing fits, go to "Draft a skill".
 ## Draft a skill
 
 1. Pick a short lowercase name with hyphens that says what it does, e.g. `duplicate-invoice-check`.
-2. Write it to `.claude/skills-orchestrator/drafts/<name>/SKILL.md` (that `.claude/` folder is at the top of the repository, or the current working folder when there is no repository; see `features/memory.md`) with:
+2. Save it with `... draft save --name <name>`, with the text on standard input as in `features/cards.md` "Saving a card". It lands in `.claude/skills-orchestrator/drafts/<name>/SKILL.md` (that `.claude/` folder is at the top of the repository, or the current working folder when there is no repository; see `features/memory.md`). Delete a draft folder with `... draft remove --name <name>`. The draft has:
    - frontmatter `name: <name>` and a `description` that starts with "Use when";
    - the steps for this kind of subtask, written so another agent can follow them;
    - what the agent must hand back (its output).

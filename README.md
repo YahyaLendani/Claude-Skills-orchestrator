@@ -141,7 +141,7 @@ startup line. The checker then falls back to a fresh agent that can run
 commands, with the same instructions, which is what it always did before the plugin
 existed.
 
-Current version: 1.6.0.
+Current version: 1.6.1.
 
 ## Quick start
 

@@ -19,6 +19,7 @@ These hold even when two sessions run in the same project at the same time.
 | Missing evidence isn't success | A `worked` result with no evidence for that skill is stored as `unverified` | `result append` |
 | No lost score updates | `scores.md` is rebuilt from the baseline + all result records, under the same lock as new results | `scores sync` |
 | No lost memory entries | Read-modify-write under a lock, then atomic replace; an update changes only that entry's result and note | `memory add`, `memory update` |
+| Writes Claude Code would refuse | Board lines, cards, trimmed copies and drafts go through the utility, under a lock, and can't follow a link out of the state folder | `board post`, `card save`, `trimmed save`, `draft save`, `draft remove` |
 | Older state keeps counting | Job, result, baseline and reset files from 1.4 and 1.5 are read as they are, and old result records aren't rewritten; a `worked` from those versions stays `worked`, and a date-only reset excludes results from that whole day | `scores sync`, `validate`, `job` commands |
 | Broken records are reported | Reads only; `validate` exits 1 if a job or result file is broken | `job list`, `validate` |
 | Skill fingerprints | One SHA-256 over every file in the skill folder, ignoring caches | `fingerprint` |
@@ -26,6 +27,8 @@ These hold even when two sessions run in the same project at the same time.
 | Locks don't outlive a crash | An operating-system file lock, which ends with the process; a command waits for it, then refuses | all writes |
 
 ## Still instructions
+
+A score committed with a repository can still win a tie: the rule against it is on `features/reliability.md`, but a test followed it in only 1 of 6 runs (`evals/RESULTS.md`).
 
 These depend on the model following the markdown, and are not guarantees on
 their own.

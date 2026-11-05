@@ -1853,6 +1853,7 @@ class PagesAgree(unittest.TestCase):
         self.assertEqual(seen, {
             "job new", "job close", "job gc", "job recover", "job list", "memory add", "memory update",
             "result append", "scores sync", "scores reset", "fingerprint", "validate",
+            "board post", "card save", "trimmed save", "draft save", "draft remove",
         })
 
     def test_every_flag_is_documented(self):
@@ -1935,6 +1936,98 @@ class PluginManifest(unittest.TestCase):
         # A plugin load replaces this text with the path, which would garble the
         # sentence telling the reader what to do with it.
         self.assertNotIn("${CLAUDE_PLUGIN_ROOT}", self.skill)
+
+
+class FilesUnderClaude(Base):
+    """board post, card save, trimmed save and draft save/remove: writes Claude Code refuses directly."""
+
+    def piped(self, text, *args):
+        return subprocess.run([sys.executable, "-B", str(SCRIPT), *args], cwd=self.project, env=self.env(),
+                              input=text.encode("utf-8"), capture_output=True, timeout=120)
+
+    def board_job(self):
+        return self.ok("job", "new", "--session", "s1", "--task", "t", "--agents", "2")
+
+    def test_board_post_adds_one_formatted_line(self):
+        job = self.board_job()
+        self.ok("board", "post", "--id", job["id"], "--agent", "2", "--kind", "finding", "--text", "the field is  remember_me\nnow")
+        text = Path(job["board"]).read_text(encoding="utf-8")
+        self.assertEqual(text.splitlines()[-1], "[Agent 2] finding: the field is remember_me now")
+
+    def test_board_posts_at_once_all_arrive(self):
+        job = self.board_job()
+        runs = [subprocess.Popen([sys.executable, "-B", str(SCRIPT), "board", "post", "--id", job["id"], "--agent", str(n),
+                                  "--kind", "decision", "--text", f"line {n}"], cwd=self.project, env=self.env(),
+                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) for n in range(1, 9)]
+        self.assertEqual([run.wait(timeout=120) for run in runs], [0] * 8)
+        lines = Path(job["board"]).read_text(encoding="utf-8").splitlines()
+        self.assertEqual(sorted(line for line in lines if line.startswith("[Agent")),
+                         sorted(f"[Agent {n}] decision: line {n}" for n in range(1, 9)))
+
+    def test_board_post_refusals(self):
+        one = self.new_job()
+        self.assertIn("no board", self.refused("board", "post", "--id", one, "--agent", "1", "--kind", "finding", "--text", "x"))
+        job = self.board_job()
+        self.assertEqual(self.run_cli("board", "post", "--id", job["id"], "--agent", "1", "--kind", "progress", "--text", "x").returncode, 2)
+        self.refused("board", "post", "--id", job["id"], "--agent", "0", "--kind", "finding", "--text", "x")
+        self.refused("board", "post", "--id", job["id"], "--agent", "1", "--kind", "finding", "--text", "  ")
+        self.refused("board", "post", "--id", job["id"], "--agent", "1", "--kind", "finding", "--text", "x" * 5000)
+        self.refused("board", "post", "--id", "../../etc", "--agent", "1", "--kind", "finding", "--text", "x")
+        self.ok("job", "close", "--id", job["id"], "--session", "s1", "--no-results")
+        self.assertIn("not active", self.refused("board", "post", "--id", job["id"], "--agent", "1", "--kind", "finding", "--text", "x"))
+
+    CARD = "# pdf\n\n```yaml\nskill: anthropic-skills:pdf\nfingerprint: abc\n```\n"
+
+    def test_card_save_goes_to_the_scope_asked_for(self):
+        done = self.piped(self.CARD, "card", "save", "--name", "anthropic-skills__pdf", "--scope", "user")
+        self.assertEqual(done.returncode, 0, done.stderr)
+        self.assertEqual((self.user_dir / "cards" / "anthropic-skills__pdf.md").read_text(encoding="utf-8"), self.CARD)
+        self.assertFalse((self.state_dir / "cards").exists())
+        done = self.piped(self.CARD.replace("\n", "\r\n"), "card", "save", "--name", "local", "--scope", "project")
+        self.assertEqual(done.returncode, 0, done.stderr)
+        self.assertEqual((self.state_dir / "cards" / "local.md").read_bytes(), self.CARD.encode("utf-8"))
+
+    def test_card_save_refusals_write_nothing(self):
+        for name in ("../up", "a/b", "a:b", ".hidden", ""):
+            self.assertEqual(self.piped(self.CARD, "card", "save", "--name", name, "--scope", "user").returncode, 1, name)
+        self.assertEqual(self.piped("no fields", "card", "save", "--name", "x", "--scope", "user").returncode, 1)
+        self.assertEqual(self.piped("  \n", "card", "save", "--name", "x", "--scope", "user").returncode, 1)
+        self.assertFalse((self.user_dir / "cards").exists())
+
+    def test_a_linked_folder_cant_send_a_card_outside(self):
+        outside = self.tmp / "outside"
+        outside.mkdir()
+        self.state_dir.mkdir(parents=True)
+        try:
+            os.symlink(outside, self.state_dir / "cards", target_is_directory=True)
+        except OSError:
+            self.skipTest("this system can't make links here")
+        self.assertEqual(self.piped(self.CARD, "card", "save", "--name", "x", "--scope", "project").returncode, 1)
+        self.assertEqual(list(outside.iterdir()), [])
+
+    def test_trimmed_save_checks_the_owner(self):
+        job = self.new_job()
+        self.assertEqual(self.piped("copy é", "trimmed", "save", "--id", job, "--session", "other", "--name", "pdf-agent1").returncode, 1)
+        done = self.piped("copy é", "trimmed", "save", "--id", job, "--session", "s1", "--name", "pdf-agent1")
+        self.assertEqual(done.returncode, 0, done.stderr)
+        self.assertEqual((self.state_dir / "jobs" / job / "trimmed" / "pdf-agent1.md").read_text(encoding="utf-8"), "copy é")
+
+    def test_draft_save_and_remove(self):
+        self.assertEqual(self.piped("no frontmatter", "draft", "save", "--name", "check").returncode, 1)
+        draft = "---\nname: check\n---\nsteps\n"
+        done = self.piped(draft, "draft", "save", "--name", "check")
+        self.assertEqual(done.returncode, 0, done.stderr)
+        self.assertEqual((self.state_dir / "drafts" / "check" / "SKILL.md").read_text(encoding="utf-8"), draft)
+        self.ok("draft", "remove", "--name", "check")
+        self.assertFalse((self.state_dir / "drafts" / "check").exists())
+        self.assertIn("no draft", self.refused("draft", "remove", "--name", "check"))
+
+    def test_validate_still_passes_with_these_files(self):
+        job = self.board_job()
+        self.ok("board", "post", "--id", job["id"], "--agent", "1", "--kind", "finding", "--text", "x")
+        self.piped(self.CARD, "card", "save", "--name", "x", "--scope", "project")
+        self.piped("---\nname: d\n---\n", "draft", "save", "--name", "d")
+        self.ok("validate")
 
 
 if __name__ == "__main__":
