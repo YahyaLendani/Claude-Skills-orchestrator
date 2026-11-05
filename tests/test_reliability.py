@@ -60,6 +60,8 @@ def test_replacement_not_weak():  # Review Focus 2
 def test_a_committed_line_cant_win_a_tie():
     t = " ".join(read_skill_file("features/reliability.md").split())
     assert "only a line in the user file can win a tie" in t
+    flow = " ".join(read_skill_file("SKILL.md").split())
+    assert "ignoring a line that's only in a project `scores.md` tracked by git" in flow
 
 
 def test_ties_go_to_higher_score():
