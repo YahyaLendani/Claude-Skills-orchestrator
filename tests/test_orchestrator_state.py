@@ -1853,6 +1853,7 @@ class PagesAgree(unittest.TestCase):
         self.assertEqual(seen, {
             "job new", "job close", "job gc", "job recover", "job list", "memory add", "memory update",
             "result append", "scores sync", "scores reset", "fingerprint", "validate",
+            "board post", "card save", "trimmed save", "draft save", "draft remove",
         })
 
     def test_every_flag_is_documented(self):

@@ -43,7 +43,7 @@ key_rules:
 
 ## Saving a card
 
-Save it with the state utility, not a file-writing tool, because Claude Code refuses or asks about direct writes under `.claude/`, even with an allow rule. Run it from the project folder, using `--scope user` or `--scope project` as "Where cards live" says, with the card on standard input:
+Save it with the state utility, not a file-writing tool, because Claude Code refuses or asks about direct writes under `.claude/`, even with an allow rule. Run `... card save --name <safe name> --scope user` from the project folder, using `--scope user` or `--scope project` as "Where cards live" says, with the card on standard input:
 
 ```bash
 python "${CLAUDE_PLUGIN_ROOT}/scripts/orchestrator_state.py" card save --name <safe name> --scope user <<'CARD'
