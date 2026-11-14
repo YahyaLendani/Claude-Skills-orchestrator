@@ -124,6 +124,32 @@ def same_path(a: Path, b: Path) -> bool:
     return os.path.normcase(os.path.realpath(a)) == os.path.normcase(os.path.realpath(b))
 
 
+def plain_real_path(path: Path) -> str:
+    """Where a path really leads. Windows can answer in its extended form while another process creates a folder."""
+    text = os.path.realpath(path)
+    extended = "\\\\?\\"
+    if text.startswith(extended + "UNC\\"):
+        text = "\\\\" + text[len(extended) + 4:]
+    elif text.startswith(extended):
+        text = text[len(extended):]
+    return os.path.normcase(text)
+
+
+def is_inside(path: Path, top: Path) -> bool:
+    """True when path really leads to top or to something under it."""
+    real, base = plain_real_path(path), plain_real_path(top)
+    return real == base or real.startswith(base.rstrip(os.sep) + os.sep)
+
+
+def project_state(root: Path) -> Scope:
+    """The project's state folder. A link that came with a clone can't send it out of the project."""
+    state = root.joinpath(*STATE_FOLDER)
+    for path in (state.parent, state, *(state / name for name in ("cards", "drafts", "jobs", "results"))):
+        if not is_inside(path, root):
+            raise Refused(f"{path} leads outside the project, to {plain_real_path(path)}; nothing was read or written. Check that link.")
+    return Scope("project", state)
+
+
 def all_scopes() -> list[Scope]:
     """The project scope, then the user scope. Lock order follows this list.
 
@@ -134,10 +160,10 @@ def all_scopes() -> list[Scope]:
     try:
         home = Path.home().resolve()
     except RuntimeError:
-        return [Scope("project", root.joinpath(*STATE_FOLDER))]
+        return [project_state(root)]
     if same_path(root, home):
         return [Scope("user", home.joinpath(*STATE_FOLDER))]
-    return [Scope("project", root.joinpath(*STATE_FOLDER)), Scope("user", home.joinpath(*STATE_FOLDER))]
+    return [project_state(root), Scope("user", home.joinpath(*STATE_FOLDER))]
 
 
 def short_hash(text: str) -> str:
@@ -265,6 +291,8 @@ def exclude_from_git(notices: list[str]) -> None:
         if found.returncode != 0:
             raise OSError(found.stderr.strip() or "git rev-parse failed")
         path = root / found.stdout.strip()
+        if path.is_symlink():
+            raise OSError(f"{path} is a link, so it was left alone")
         path.parent.mkdir(parents=True, exist_ok=True)
         existing = path.read_text(encoding="utf-8") if path.exists() else ""
         have = {line.strip() for line in existing.splitlines()}
@@ -1484,6 +1512,14 @@ class ScoreFile:
         return report
 
 
+def tracked_by_git(path: Path) -> bool:
+    try:
+        return subprocess.run(["git", "ls-files", "--error-unmatch", "--", str(path)], cwd=project_root(),
+                              capture_output=True, timeout=30).returncode == 0
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
 def mirror_missing_records(scopes: list[Scope], notices: list[str]) -> None:
     """Copy this user's project records the user folder missed, when it wasn't writable at the time.
 
@@ -1498,8 +1534,9 @@ def mirror_missing_records(scopes: list[Scope], notices: list[str]) -> None:
         if record.get("origin") != origin:
             continue
         mirror = mirror_path(scopes[1], record["job_id"])
-        if not mirror.exists():
-            source = scopes[0].results / f"{record['job_id']}.json"
+        source = scopes[0].results / f"{record['job_id']}.json"
+        # The origin is only a hash of a home path, which a repository's author could work out.
+        if not mirror.exists() and source.is_file() and not tracked_by_git(source):
             atomic_write(mirror, source.read_bytes())
             notices.append(f"copied the result record for job {record['job_id']} to the user folder")
 
@@ -1622,9 +1659,8 @@ def checked_name(name: str, what: str) -> str:
 
 def stay_inside(scope: Scope, path: Path) -> Path:
     """A folder that came with a clone can't send a write outside the state folder through a link."""
-    top = scope.path.resolve()
-    if top not in path.resolve().parents:
-        raise Refused(f"{path} leads outside {top}; nothing was written")
+    if not is_inside(path, scope.path) or plain_real_path(path) == plain_real_path(scope.path):
+        raise Refused(f"{path} leads outside {scope.path}; nothing was written")
     return path
 
 

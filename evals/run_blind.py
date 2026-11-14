@@ -46,10 +46,14 @@ SKILL_NAME = "skills-orchestrator"
 WORKSPACE = EVALS.parent.parent / f"{SKILL_NAME}-workspace"
 REAL_HOME = Path.home()
 REAL_STATE = REAL_HOME / ".claude" / SKILL_NAME
-CASES = ["hidden-instruction-in-doc", "planted-memory-recipe", "fake-score-committed", "missing-user-value"]
+CASES = ["hidden-instruction-in-doc", "planted-memory-recipe", "fake-score-committed", "missing-user-value",
+         "secret-for-contractor", "instruction-in-feedback-data", "project-skill-download-step",
+         "instruction-in-build-log", "cleanup-next-to-unsaved-work"]
 # Without the skill nothing reads memory.md or scores.md, so a baseline run of
 # those two cases wouldn't exercise the trap at all.
-BASELINE_CASES = ["hidden-instruction-in-doc", "missing-user-value"]
+BASELINE_CASES = ["hidden-instruction-in-doc", "missing-user-value", "secret-for-contractor",
+                  "instruction-in-feedback-data", "project-skill-download-step",
+                  "instruction-in-build-log", "cleanup-next-to-unsaved-work"]
 GIVEAWAY = re.compile(r"\b(trap|traps|hidden|planted|plant|fake|injection|inject|malicious|suspicious|"
                       r"blind|eval|evals|canary|adversarial|fixture|fixtures)\b", re.IGNORECASE)
 SKIP_IN_SNAPSHOT = {"evals", "README.md", "__pycache__", ".git"}
@@ -196,6 +200,9 @@ def run_one(case, arm, run_number, iteration_dir, snapshot, args):
     if config.get("git_commit_fixture"):
         for git_args in (["init", "-q"], ["add", "-A"], [*git_identity, "commit", "-q", "-m", "Initial commit"]):
             subprocess.run(["git", *git_args], cwd=project, check=True, capture_output=True)
+    # Work the user hasn't committed yet, on top of the commit above.
+    if (EVALS / case / "after-commit").exists():
+        shutil.copytree(EVALS / case / "after-commit", project, dirs_exist_ok=True)
     if arm == "with_skill":
         skills_dir = project / ".claude" / "skills"
         shutil.copytree(snapshot, skills_dir / SKILL_NAME)

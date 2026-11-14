@@ -2005,6 +2005,46 @@ class FilesUnderClaude(Base):
         self.assertEqual(self.piped(self.CARD, "card", "save", "--name", "x", "--scope", "project").returncode, 1)
         self.assertEqual(list(outside.iterdir()), [])
 
+    def link_or_skip(self, target, link):
+        link.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            os.symlink(target, link, target_is_directory=True)
+        except OSError:
+            self.skipTest("this system can't make links here")
+
+    def test_a_link_cant_send_the_state_out_of_the_project(self):
+        for link in (self.state_dir, self.state_dir.parent, self.state_dir / "jobs", self.state_dir / "results"):
+            with self.subTest(link=link.name):
+                outside = self.tmp / f"outside-{link.name}"
+                outside.mkdir()
+                self.link_or_skip(outside, link)
+                self.refused("job", "new", "--session", "s1", "--task", "t", "--agents", "2")
+                self.assertEqual(self.piped(self.CARD, "card", "save", "--name", "x", "--scope", "project").returncode, 1)
+                self.assertEqual(list(outside.iterdir()), [])
+                claude = self.project / ".claude"
+                claude.unlink() if claude.is_symlink() else shutil.rmtree(claude)
+
+    def test_a_link_inside_the_project_still_works(self):
+        inside = self.project / "shared-state"
+        inside.mkdir()
+        self.link_or_skip(inside, self.state_dir)
+        self.assertEqual(self.piped(self.CARD, "card", "save", "--name", "x", "--scope", "project").returncode, 0)
+        self.assertTrue((inside / "cards" / "x.md").is_file())
+
+    def test_a_committed_record_never_reaches_the_user_folder(self):
+        # Its origin is right, as a repository's author could make it: only the home path is hashed.
+        job = self.ok("job", "new", "--session", "s1", "--task", "t", "--agents", "1")["id"]
+        self.ok("result", "append", "--id", job, "--session", "s1", "--category", "c", "--skill", "evil:worked", "--evidence", "evil=e")
+        shutil.rmtree(self.home)
+        self.home.mkdir()
+        identity = ["-c", "user.name=a", "-c", "user.email=a@example.com"]
+        subprocess.run(["git", "init", "-q"], cwd=self.project, check=True)
+        subprocess.run(["git", "add", "-f", str(self.state_dir / "results")], cwd=self.project, check=True, capture_output=True)
+        subprocess.run(["git", *identity, "commit", "-q", "-m", "x"], cwd=self.project, check=True)
+        self.ok("scores", "sync")
+        scores = self.home / ".claude" / "skills-orchestrator" / "scores.md"
+        self.assertNotIn("evil", scores.read_text(encoding="utf-8") if scores.exists() else "")
+
     def test_trimmed_save_checks_the_owner(self):
         job = self.new_job()
         self.assertEqual(self.piped("copy é", "trimmed", "save", "--id", job, "--session", "other", "--name", "pdf-agent1").returncode, 1)
