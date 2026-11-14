@@ -20,6 +20,8 @@ These hold even when two sessions run in the same project at the same time.
 | No lost score updates | `scores.md` is rebuilt from the baseline + all result records, under the same lock as new results | `scores sync` |
 | No lost memory entries | Read-modify-write under a lock, then atomic replace; an update changes only that entry's result and note | `memory add`, `memory update` |
 | Writes Claude Code would refuse | Board lines, cards, trimmed copies and drafts go through the utility, under a lock, and can't follow a link out of the state folder | `board post`, `card save`, `trimmed save`, `draft save`, `draft remove` |
+| State stays in the project | The project's state folder and its `cards`, `drafts`, `jobs` and `results` folders must really lead inside the project; a link that points out of it is refused before anything is read or written | every command in a project |
+| Committed records stay out of your scores | A result record that git tracks is never copied into your own scores folder, whatever origin it claims | `scores sync` |
 | Older state keeps counting | Job, result, baseline and reset files from 1.4 and 1.5 are read as they are, and old result records aren't rewritten; a `worked` from those versions stays `worked`, and a date-only reset excludes results from that whole day | `scores sync`, `validate`, `job` commands |
 | Broken records are reported | Reads only; `validate` exits 1 if a job or result file is broken | `job list`, `validate` |
 | Skill fingerprints | One SHA-256 over every file in the skill folder, ignoring caches | `fingerprint` |
@@ -40,6 +42,8 @@ their own.
 - the content of a memory entry or result (the utility stores what it is given);
 - deleting drafts and trimmed copies, and keeping `jobs/` out of commits;
 - committing memory and scores (the skill never commits on its own).
+
+Known gaps with no code guard (from the 1.6.2 attack run in `evals/RESULTS.md`): a result record that arrives untracked, for example in a zip download, with a guessed origin can still reach your scores, because the origin is only a hash of the home path. Secrets in memory notes, download commands in draft skills and odd bytes in cards are stored as given, and `board post` doesn't check the session.
 
 ## When Python is not available
 
