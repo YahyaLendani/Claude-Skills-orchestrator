@@ -1147,6 +1147,52 @@ class ScoresSync(Base):
         self.ok("scores", "sync")
         self.assertEqual(self.scores(self.user_dir)["pdf"]["partly"], "1")
 
+    def lose_the_mirror(self, job):
+        """As when the record was made while the user folder couldn't be written: only the project has it."""
+        shutil.rmtree(self.user_dir)
+        return self.state_dir / "results" / f"{job}.json"
+
+    def test_a_record_is_signed_and_the_key_stays_out_of_the_project(self):
+        job = self.new_job()
+        self.append(job, "pdf:partly")
+        key_file = self.home / ("AppData/Local" if os.name == "nt" else ".local/state") / "skills-orchestrator" / "signing.key"
+        key = key_file.read_text(encoding="ascii").strip()
+        self.assertRegex(key, r"^[0-9a-f]{64}$")
+        record = json.loads((self.state_dir / "results" / f"{job}.json").read_text(encoding="utf-8"))
+        self.assertRegex(record["signature"], r"^[0-9a-f]{64}$")
+        for path in self.project.rglob("*"):
+            if path.is_file():
+                self.assertNotIn(key, path.read_text(encoding="utf-8", errors="replace"), path)
+
+    def test_an_unchanged_signed_record_still_reaches_the_user_folder(self):
+        job = self.new_job()
+        self.append(job, "pdf:partly")
+        self.lose_the_mirror(job)
+        out = self.ok("scores", "sync")
+        self.assertEqual(self.scores(self.user_dir)["pdf"]["partly"], "1")
+        self.assertIn("copied the result record", " ".join(out["notices"]))
+
+    def test_a_forged_untracked_record_never_reaches_the_user_folder(self):
+        # As if it came in a zip download: right origin, not committed, so only the signature can tell.
+        for forge in ("edited", "unsigned", "signed with another key"):
+            with self.subTest(forge=forge):
+                job = self.new_job()
+                self.append(job, "pdf:partly")
+                path = self.lose_the_mirror(job)
+                record = json.loads(path.read_text(encoding="utf-8"))
+                record["skills"][0]["skill"] = "evil"
+                if forge == "unsigned":
+                    del record["signature"]
+                elif forge == "signed with another key":
+                    record["signature"] = state.record_signature(record, b"k" * 32)
+                path.write_text(json.dumps(record), encoding="utf-8")
+                out = self.ok("scores", "sync")
+                user_scores = self.user_dir / "scores.md"
+                self.assertNotIn("evil", user_scores.read_text(encoding="utf-8") if user_scores.exists() else "")
+                self.assertIn("didn't sign it", " ".join(out["notices"]))
+                self.assertEqual(self.scores(self.state_dir)["evil"]["partly"], "1")
+                shutil.rmtree(self.state_dir)
+
     def test_a_record_from_someone_elses_clone_stays_out_of_the_user_file(self):
         job = self.new_job()
         record = {
