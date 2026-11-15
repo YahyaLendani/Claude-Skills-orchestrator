@@ -128,6 +128,15 @@ On Linux (WSL, Python 3.14), the 1.6.1 branch passes 409 tests with 2 skipped, i
 
 **Still not run:** a real model job on Linux, because Claude Code isn't installed in WSL, and a job on an installed copy of the skill. The blind trap results below were not re-run, so their verdict still stands.
 
+## Checks for 1.6.3
+
+Run 2026-11-15. Closes the last forged-record gap from the 1.6.2 attack run: a record that wasn't committed, for example one in a zip download, with a guessed origin still reached the user's own scores.
+
+- Each new record is signed (HMAC-SHA256) with a random key that lives outside every project and outside `~/.claude`, so it still works when that folder can't be written.
+- A sync copies a missed record into the user folder only if this machine signed it and git doesn't track it. A record that's edited, unsigned, or signed with another key is left out, with a notice; it still counts in the project's own scores.
+- Records from before 1.6.3 have no signature. A sync no longer copies those into the user folder; records copied when they were made are unaffected.
+- Windows: 415 passed, 6 skipped. Linux (WSL, Python 3.14): 414 passed, 2 skipped, 1 failed. The failure was `test_legacy_reset_on_excludes_that_whole_day`, which fails on `main` too: it writes the reset date in UTC while records keep the local date, so it fails in the hour after local midnight. Run again after that, it passes.
+
 ## Checks for 1.6.2
 
 Run 2026-11-05 to 2026-11-14, Opus 5.5, Claude Code 2.1.314.

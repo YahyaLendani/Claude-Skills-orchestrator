@@ -30,6 +30,7 @@ import collections
 import dataclasses
 import errno
 import hashlib
+import hmac
 import json
 import os
 import random
@@ -181,6 +182,58 @@ def origin_key() -> str:
         return short_hash(os.path.normcase(str(Path.home().resolve())))
     except RuntimeError:
         return ""
+
+
+def signing_key_path() -> Path:
+    """Outside ~/.claude, so it still works when that folder can't be written, and outside every project."""
+    home = Path.home()
+    base = home / "AppData" / "Local" if os.name == "nt" else home / ".local" / "state"
+    return base / "skills-orchestrator" / "signing.key"
+
+
+def signing_key(create: bool) -> bytes | None:
+    """A random secret only this machine has. A repository's author can't work it out, unlike the origin."""
+    try:
+        path = signing_key_path()
+    except RuntimeError:
+        return None
+    for _attempt in range(40):
+        try:
+            text = path.read_text(encoding="ascii").strip()
+        except FileNotFoundError:
+            if not create:
+                return None
+            try:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            except FileExistsError:
+                continue
+            except OSError:
+                return None
+            text = secrets.token_hex(32)
+            with os.fdopen(descriptor, "w", encoding="ascii") as handle:
+                handle.write(text + "\n")
+                handle.flush()
+                os.fsync(handle.fileno())
+        except (OSError, UnicodeDecodeError):
+            return None
+        if re.fullmatch(r"[0-9a-f]{64}", text):
+            return bytes.fromhex(text)
+        if text:
+            return None
+        time.sleep(0.05)  # another process has made the file and is still writing it
+    return None
+
+
+def record_signature(record: dict, key: bytes) -> str:
+    body = {name: value for name, value in record.items() if name != "signature"}
+    data = json.dumps(body, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return hmac.new(key, data, hashlib.sha256).hexdigest()
+
+
+def signed_here(record: dict, key: bytes | None) -> bool:
+    claimed = record.get("signature")
+    return bool(key) and isinstance(claimed, str) and hmac.compare_digest(claimed, record_signature(record, key))
 
 
 # ---------------------------------------------------------------- locking
@@ -1240,6 +1293,12 @@ def cmd_result_append(args) -> None:
                 "origin": origin_key(),
                 "skills": entries,
             }
+            key = signing_key(create=True)
+            if key:
+                record["signature"] = record_signature(record, key)
+            else:
+                notices.append(f"no signing key could be made at {signing_key_path()}, so if the user folder misses "
+                               "this record, a later scores sync won't copy it there")
             data = json_bytes(record)
             atomic_write(path, data)
         mirror = None
@@ -1529,16 +1588,23 @@ def mirror_missing_records(scopes: list[Scope], notices: list[str]) -> None:
     if len(scopes) < 2:
         return
     origin = origin_key()
+    key = signing_key(create=False)
     for moment_record in discover_records(scopes[0], []):
         record = moment_record[1]
         if record.get("origin") != origin:
             continue
         mirror = mirror_path(scopes[1], record["job_id"])
         source = scopes[0].results / f"{record['job_id']}.json"
-        # The origin is only a hash of a home path, which a repository's author could work out.
-        if not mirror.exists() and source.is_file() and not tracked_by_git(source):
-            atomic_write(mirror, source.read_bytes())
-            notices.append(f"copied the result record for job {record['job_id']} to the user folder")
+        if mirror.exists() or not source.is_file():
+            continue
+        # The origin is only a hash of a home path, which a repository's author could work out;
+        # the signature needs this machine's key.
+        if not signed_here(record, key) or tracked_by_git(source):
+            notices.append(f"left the result record for job {record['job_id']} out of the user folder: this machine "
+                           "didn't sign it, so it may not be yours. It still counts in this project's scores")
+            continue
+        atomic_write(mirror, source.read_bytes())
+        notices.append(f"copied the result record for job {record['job_id']} to the user folder")
 
 
 def rebuild_scores(scopes: list[Scope], notices: list[str], reset_skill: str | None = None) -> tuple:
